@@ -1,5 +1,5 @@
-import AuthScreen from "./AuthScreen";
+import SplashScreen from "./SplashScreen";
 
 export default function Index() {
-  return <AuthScreen />;
+  return <SplashScreen />;
 }
