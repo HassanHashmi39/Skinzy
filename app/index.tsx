@@ -1,5 +1,5 @@
-import SplashScreen from "./SplashScreen";
+import HealthInfoScreen from "./HealthInfoScreen";
 
 export default function Index() {
-  return <SplashScreen />;
+  return <HealthInfoScreen />;
 }

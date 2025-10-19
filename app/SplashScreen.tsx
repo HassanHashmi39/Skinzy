@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
-import { Animated, Easing, StyleSheet, View } from "react-native";
+import { Animated, Easing, Image, StyleSheet, View } from "react-native";
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -8,7 +8,6 @@ export default function SplashScreen() {
   const scaleAnim = new Animated.Value(0.8);
 
   useEffect(() => {
-    // Fade & scale animation
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -23,9 +22,8 @@ export default function SplashScreen() {
       }),
     ]).start();
 
-    // Navigate to next screen after 3 seconds
     const timeout = setTimeout(() => {
-      router.push("/Onboarding"); // will go to Onboarding next
+      router.push("/Onboarding"); 
     }, 3000);
 
     return () => clearTimeout(timeout);
@@ -33,6 +31,9 @@ export default function SplashScreen() {
 
   return (
     <View style={styles.container}>
+        <Image source={require('../assets/logo (2).png')} style={{width:150, height:150, marginBottom:20}} >
+
+        </Image>
       <Animated.Text
         style={[
           styles.logoText,
@@ -46,6 +47,9 @@ export default function SplashScreen() {
       </Animated.Text>
       <Animated.Text style={[styles.tagline, { opacity: fadeAnim }]}>
         AI Skincare & Wellness
+      </Animated.Text>
+      <Animated.Text style={[styles.tagline, { opacity: fadeAnim }]}>
+        Signup to Look Good & Feel Great!
       </Animated.Text>
     </View>
   );
