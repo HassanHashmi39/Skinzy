@@ -1,5 +1,5 @@
-import HealthInfoScreen from "./HealthInfoScreen";
+import Dashboard from "./Dashboard";
 
 export default function Index() {
-  return <HealthInfoScreen />;
+  return <Dashboard />;
 }
