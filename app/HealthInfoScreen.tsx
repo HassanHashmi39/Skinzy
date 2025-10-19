@@ -1,12 +1,12 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function HealthInfoScreen() {
@@ -31,7 +31,7 @@ export default function HealthInfoScreen() {
       return;
     }
     Alert.alert("Saved ✅", "Your health and skin info has been recorded.");
-    router.push("/PermissionsScreen"); // next page in flow
+    router.push("/PermissionsScreen"); 
   };
 
   return (

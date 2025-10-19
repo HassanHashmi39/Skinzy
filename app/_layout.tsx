@@ -1,37 +1,117 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { Ionicons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
 
 export default function Layout() {
   return (
     <Tabs
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ color, size }) => {
-          let iconName;
-
-          if (route.name === 'Dashboard') iconName = 'home';
-          else if (route.name === 'Articles') iconName = 'newspaper';
-          else if (route.name === 'Measure') iconName = 'scan';
-          else if (route.name === 'Market') iconName = 'bag-handle';
-          else if (route.name === 'Consult') iconName = 'chatbubbles';
-
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: '#000',  
-        tabBarInactiveTintColor: '#888', 
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: "#000",
+        tabBarInactiveTintColor: "#999",
         tabBarStyle: {
-          backgroundColor: '#fff',       
-          borderTopColor: '#000',        
+          backgroundColor: "#fff",
+          borderTopColor: "#000",
           borderTopWidth: 1,
           height: 60,
         },
-        headerShown: false,
-      })}
+      }}
     >
-      <Tabs.Screen name="Home" options={{ title: 'Home' }} />
-      <Tabs.Screen name="Articles" options={{ title: 'Articles' }} />
-      <Tabs.Screen name="Measure" options={{ title: 'Measure' }} />
-      <Tabs.Screen name="Market" options={{ title: 'Market' }} />
-      <Tabs.Screen name="Consult" options={{ title: 'Consult' }} />
+      {/* Visible Tabs */}
+      <Tabs.Screen name="Dashboard" options={{
+        title: "Home",
+        tabBarIcon: ({ color, size }) => (
+          <Ionicons name="home-outline" color={color} size={size} />
+        ),
+      }} />
+
+    
+
+      <Tabs.Screen name="Consult" options={{
+        title: "Consult",
+        tabBarIcon: ({ color, size }) => (
+          <Ionicons name="chatbubbles-outline" color={color} size={size} />
+        ),
+      }} />
+      <Tabs.Screen name="MyRoutine" options={{
+        title: "My Routine",
+        tabBarIcon: ({ color, size }) => (
+          <Ionicons name="leaf-outline" color={color} size={size} />
+        ),
+      }} />
+        <Tabs.Screen name="Measure" options={{
+        title: "Analyze",
+        tabBarIcon: ({ color, size }) => (
+          <Ionicons name="scan-outline" color={color} size={size} />
+        ),
+      }} />
+      <Tabs.Screen name="Products" options={{
+        title: "Shop",
+        tabBarIcon: ({ color, size }) => (
+          <Ionicons name="cart-outline" color={color} size={size} />
+        ),
+      }} />
+      <Tabs.Screen name="AnalysisHistory" options={{
+        title: "History",
+        tabBarIcon: ({ color, size }) => (
+          <Ionicons name="time-outline" color={color} size={size} />
+        ),
+      }} />
+      <Tabs.Screen name="MyBookings" options={{
+        title: "Bookings",
+        tabBarIcon: ({ color, size }) => (
+          <Ionicons name="calendar-outline" color={color} size={size} />
+        ),
+      }} />
+
+    
+
+      {/* Hidden Pages */}
+      <Tabs.Screen
+        name="BookConsultation"
+        options={{ href: null }} 
+      />
+      <Tabs.Screen
+        name="BookingSuccess"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="AnalysisResult"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="PermissionsScreen"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="HealthInfoScreen"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="UserInfoScreen"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="AuthScreen"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="SplashScreen"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+      name="Notifications"
+      options={{ href: null }}
+    />
+    <Tabs.Screen
+      name="Profile"
+      options={{ href: null }}
+    />
+    <Tabs.Screen
+    name="index"
+    options={{ href: null }}
+  />
+
+
     </Tabs>
   );
 }

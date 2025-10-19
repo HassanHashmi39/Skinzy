@@ -1,17 +1,19 @@
-import { useLocalSearchParams } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function BookConsultation() {
   const { doctor } = useLocalSearchParams();
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -26,7 +28,7 @@ export default function BookConsultation() {
     description: "",
   });
 
-  const handleChange = (key: string, value: string) =>
+  const handleChange = (key, value) =>
     setFormData({ ...formData, [key]: value });
 
   const handleSubmit = async () => {
@@ -39,7 +41,8 @@ export default function BookConsultation() {
     }
 
     try {
-      const response = await fetch("https://formspree.io/f/xqayjpng", {
+      // ---- Send to Formspree ----
+      await fetch("https://formspree.io/f/xqayjpng", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -48,25 +51,38 @@ export default function BookConsultation() {
         }),
       });
 
-      if (response.ok) {
-        Alert.alert("Booking Confirmed ✅", "Doctor will contact you soon.");
-        setFormData({
-          name: "",
-          email: "",
-          gender: "",
-          age: "",
-          skinType: "",
-          familyDisease: "",
-          allergies: "",
-          date: "",
-          time: "",
-          description: "",
-        });
-      } else {
-        Alert.alert("Error", "Something went wrong, please try again.");
-      }
+      // ---- Save booking locally ----
+      const existing = JSON.parse(await AsyncStorage.getItem("bookings")) || [];
+      const newBooking = {
+        id: Date.now(),
+        doctor: doctor || "General Dermatologist",
+        date: formData.date,
+        time: formData.time,
+        mode: "Online",
+        notes: formData.description,
+        status: "Pending",
+      };
+      existing.push(newBooking);
+      await AsyncStorage.setItem("bookings", JSON.stringify(existing));
+
+      // ---- Navigate to success screen ----
+      router.push("/BookingSuccess");
+
+      // ---- Reset form ----
+      setFormData({
+        name: "",
+        email: "",
+        gender: "",
+        age: "",
+        skinType: "",
+        familyDisease: "",
+        allergies: "",
+        date: "",
+        time: "",
+        description: "",
+      });
     } catch (error) {
-      Alert.alert("Network Error", "Check your connection and try again.");
+      Alert.alert("Error", "Something went wrong, please try again.");
     }
   };
 
@@ -74,95 +90,38 @@ export default function BookConsultation() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Book Consultation</Text>
       <Text style={styles.subtitle}>
-        {doctor
-          ? `Booking with ${doctor}`
-          : "Please select a doctor from the list"}
+        {doctor ? `Booking with ${doctor}` : "Please select a doctor from the list"}
       </Text>
 
       <View style={styles.form}>
-        {/* Personal Info */}
-        <Text style={styles.label}>Full Name *</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your full name"
-          value={formData.name}
-          onChangeText={(t) => handleChange("name", t)}
-        />
+        {[
+          { key: "name", label: "Full Name *", placeholder: "Enter your full name" },
+          { key: "email", label: "Email *", placeholder: "Enter your email", keyboard: "email-address" },
+          { key: "gender", label: "Gender *", placeholder: "Male / Female / Other" },
+          { key: "age", label: "Age", placeholder: "Enter your age", keyboard: "numeric" },
+          { key: "skinType", label: "Skin Type *", placeholder: "Normal / Dry / Oily / Combination / Sensitive" },
+          { key: "familyDisease", label: "Family Disease History", placeholder: "Any hereditary conditions" },
+          { key: "allergies", label: "Allergies", placeholder: "List any allergies" },
+          { key: "date", label: "Preferred Date *", placeholder: "YYYY-MM-DD" },
+          { key: "time", label: "Preferred Time *", placeholder: "e.g. 2:30 PM" },
+        ].map((item) => (
+          <View key={item.key}>
+            <Text style={styles.label}>{item.label}</Text>
+            <TextInput
+              style={styles.input}
+              placeholder={item.placeholder}
+              keyboardType={item.keyboard || "default"}
+              value={formData[item.key]}
+              onChangeText={(t) => handleChange(item.key, t)}
+            />
+          </View>
+        ))}
 
-        <Text style={styles.label}>Email *</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your email"
-          keyboardType="email-address"
-          value={formData.email}
-          onChangeText={(t) => handleChange("email", t)}
-        />
-
-        <Text style={styles.label}>Gender *</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Male / Female / Other"
-          value={formData.gender}
-          onChangeText={(t) => handleChange("gender", t)}
-        />
-
-        <Text style={styles.label}>Age</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your age"
-          keyboardType="numeric"
-          value={formData.age}
-          onChangeText={(t) => handleChange("age", t)}
-        />
-
-        {/* Medical / Skin Info */}
-        <Text style={styles.label}>Skin Type *</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Normal / Dry / Oily / Combination / Sensitive"
-          value={formData.skinType}
-          onChangeText={(t) => handleChange("skinType", t)}
-        />
-
-        <Text style={styles.label}>Family Disease History</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Any hereditary conditions"
-          value={formData.familyDisease}
-          onChangeText={(t) => handleChange("familyDisease", t)}
-        />
-
-        <Text style={styles.label}>Allergies</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="List any allergies"
-          value={formData.allergies}
-          onChangeText={(t) => handleChange("allergies", t)}
-        />
-
-        {/* Appointment Info */}
-        <Text style={styles.label}>Preferred Date *</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="YYYY-MM-DD"
-          value={formData.date}
-          onChangeText={(t) => handleChange("date", t)}
-        />
-
-        <Text style={styles.label}>Preferred Time *</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="e.g. 2:30 PM"
-          value={formData.time}
-          onChangeText={(t) => handleChange("time", t)}
-        />
-
-        {/* Description */}
         <Text style={styles.label}>Describe Your Skin Issue *</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
-          placeholder="Describe your symptoms, how long you’ve had them, any treatments tried, etc."
           multiline
+          placeholder="Describe symptoms, how long you've had them, etc."
           value={formData.description}
           onChangeText={(t) => handleChange("description", t)}
         />
@@ -176,11 +135,7 @@ export default function BookConsultation() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: "#fff",
-    padding: 25,
-  },
+  container: { flexGrow: 1, backgroundColor: "#fff", padding: 25 },
   title: {
     fontSize: 26,
     fontWeight: "bold",
@@ -194,14 +149,8 @@ const styles = StyleSheet.create({
     marginBottom: 25,
     textAlign: "center",
   },
-  form: {
-    width: "100%",
-  },
-  label: {
-    color: "#000",
-    fontWeight: "600",
-    marginBottom: 5,
-  },
+  form: { width: "100%" },
+  label: { color: "#000", fontWeight: "600", marginBottom: 5 },
   input: {
     borderWidth: 1,
     borderColor: "#000",
@@ -210,10 +159,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     color: "#000",
   },
-  textArea: {
-    height: 120,
-    textAlignVertical: "top",
-  },
+  textArea: { height: 120, textAlignVertical: "top" },
   btn: {
     backgroundColor: "#000",
     borderRadius: 8,
@@ -221,9 +167,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-  btnText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
+  btnText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
 });

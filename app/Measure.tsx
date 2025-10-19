@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -8,7 +9,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 export default function Measure() {
@@ -16,7 +17,7 @@ export default function Measure() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // ✅ Open gallery
+  // ✅ Select from gallery
   const pickImage = async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -34,11 +35,11 @@ export default function Measure() {
 
       if (!result.canceled) setImage(result.assets[0].uri);
     } catch (error) {
-      console.log("Error picking image:", error);
+      console.log("Gallery error:", error);
     }
   };
 
-  // ✅ Open camera
+  // ✅ Take photo with camera
   const takePhoto = async () => {
     try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -56,11 +57,31 @@ export default function Measure() {
 
       if (!result.canceled) setImage(result.assets[0].uri);
     } catch (error) {
-      console.log("Error taking photo:", error);
+      console.log("Camera error:", error);
     }
   };
 
-  // ✅ Simulate AI analysis
+  // ✅ Save each analysis record to AsyncStorage
+  const saveAnalysis = async (data) => {
+    try {
+      const existing = await AsyncStorage.getItem("analysisHistory");
+      const parsed = existing ? JSON.parse(existing) : [];
+
+      const newEntry = {
+        id: Date.now(),
+        ...data,
+        image,
+        date: new Date().toLocaleDateString(),
+      };
+
+      parsed.unshift(newEntry);
+      await AsyncStorage.setItem("analysisHistory", JSON.stringify(parsed));
+    } catch (err) {
+      console.log("Error saving analysis:", err);
+    }
+  };
+
+  // ✅ Simulate AI analysis (you’ll replace this with real model later)
   const analyzeImage = async () => {
     if (!image) {
       Alert.alert("No Image", "Please upload or take a photo first.");
@@ -69,7 +90,7 @@ export default function Measure() {
 
     setLoading(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       const fakeScore = Math.floor(Math.random() * 100);
       const resultData = {
         overall: fakeScore,
@@ -92,10 +113,16 @@ export default function Measure() {
               ],
       };
 
+      await saveAnalysis(resultData);
+
       setLoading(false);
       router.push({
         pathname: "/AnalysisResult",
-        params: resultData,
+        params: {
+          ...resultData,
+          issues: JSON.stringify(resultData.issues),
+          products: JSON.stringify(resultData.products),
+        },
       });
     }, 2000);
   };
@@ -103,7 +130,9 @@ export default function Measure() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>AI Skin Analysis</Text>
-      <Text style={styles.subtitle}>Upload or capture a photo for instant skin analysis.</Text>
+      <Text style={styles.subtitle}>
+        Upload or capture a photo for instant skin analysis.
+      </Text>
 
       <View style={styles.imageBox}>
         {image ? (
@@ -119,7 +148,6 @@ export default function Measure() {
         <TouchableOpacity style={styles.outlineBtn} onPress={pickImage}>
           <Text style={styles.outlineText}>Upload</Text>
         </TouchableOpacity>
-
         <TouchableOpacity style={styles.outlineBtn} onPress={takePhoto}>
           <Text style={styles.outlineText}>Camera</Text>
         </TouchableOpacity>

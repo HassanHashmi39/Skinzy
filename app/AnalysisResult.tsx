@@ -2,21 +2,21 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function AnalysisResult() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  // ✅ Safely parse incoming params
+  // Safely parse incoming parameters
   const overall = Number(params.overall) || 0;
-  const skinAge = Number(params.skinAge) || "N/A";
+  const skinAge = params.skinAge || "N/A";
 
   let issues = [];
   let products = [];
@@ -44,7 +44,7 @@ export default function AnalysisResult() {
 
   const recommendation = params.recommendation || "No recommendation available.";
 
-  // ⚠️ Show doctor consult alert if score is poor
+  // Alert if score is low
   useEffect(() => {
     if (overall < 50) {
       Alert.alert(
@@ -71,7 +71,10 @@ export default function AnalysisResult() {
 
         <Text style={styles.label}>Overall Score:</Text>
         <Text
-          style={[styles.score, overall < 50 ? { color: "red" } : { color: "#000" }]}
+          style={[
+            styles.score,
+            overall < 50 ? { color: "red" } : { color: "#000" },
+          ]}
         >
           {overall}
         </Text>
@@ -105,9 +108,19 @@ export default function AnalysisResult() {
         )}
       </View>
 
-      {/* Doctor Consult Button */}
       {overall < 50 && (
-        <TouchableOpacity style={styles.btn}>
+        <TouchableOpacity
+          style={styles.btn}
+          onPress={() =>
+            router.push({
+              pathname: "/Consult",
+              params: {
+                from: "analysis",
+                concern: issues.join(", "),
+              },
+            })
+          }
+        >
           <Text style={styles.btnText}>Consult Doctor</Text>
         </TouchableOpacity>
       )}
