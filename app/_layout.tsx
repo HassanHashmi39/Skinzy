@@ -1,108 +1,30 @@
-import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+// app/_layout.js
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Stack, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
 
-export default function Layout() {
-  return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: "#00e40fff",
-        tabBarInactiveTintColor: "#999",
-        tabBarStyle: {
-          backgroundColor: "#fff",
-          borderTopColor: "#000",
-          borderTopWidth: 1,
-          height: 60,
-        },
-      }}
-    >
-      {/* Visible Tabs */}
-      <Tabs.Screen name="Dashboard" options={{
-        title: "Home",
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="home-outline" color={color} size={size} />
-        ),
-      }} />
+export default function RootLayout() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
-    
-        <Tabs.Screen name="Measure" options={{
-        title: "Analyze",
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="scan-outline" color={color} size={size} />
-        ),
-      }} />
-      <Tabs.Screen name="AnalysisHistory" options={{
-        title: "History",
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="time-outline" color={color} size={size} />
-        ),
-      }} />
+  useEffect(() => {
+    const checkUserType = async () => {
+      const userType = await AsyncStorage.getItem("userType");
+      setLoading(false);
+      if (userType === "Doctor") router.replace("/Doctor/DoctorInformationForm");
+      else if (userType === "Patient") router.replace("/Patient/UserInfoScreen");
+      else router.replace("/SelectionPage");
+    };
+    checkUserType();
+  }, []);
 
-    
+  if (loading)
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#000" />
+      </View>
+    );
 
-      {/* Hidden Pages */}
-      <Tabs.Screen
-        name="BookConsultation"
-        options={{ href: null }} 
-      />
-      <Tabs.Screen
-        name="BookingSuccess"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="AnalysisResult"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="PermissionsScreen"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="HealthInfoScreen"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="UserInfoScreen"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="AuthScreen"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="SplashScreen"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-      name="Notifications"
-      options={{ href: null }}
-    />
-    <Tabs.Screen
-      name="Profile"
-      options={{ href: null }}
-    />
-    <Tabs.Screen
-    name="index"
-    options={{ href: null }}
-  />
-  <Tabs.Screen
-    name="MyBookings"
-    options={{ href: null }}
-  />
-  <Tabs.Screen
-    name="Consult"
-    options={{ href: null }}
-  />
-  <Tabs.Screen
-    name="Products"
-    options={{ href: null }}
-  />
-  <Tabs.Screen
-    name="MyRoutine"
-    options={{ href: null }}
-  />
-
-
-    </Tabs>
-  );
+  return <Stack screenOptions={{ headerShown: false }} />;
 }

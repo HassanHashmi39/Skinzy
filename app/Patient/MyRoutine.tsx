@@ -161,7 +161,7 @@ export default function MyRoutine() {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Ionicons name="sparkles-outline" size={20} color="#000" />
-          <Text style={styles.sectionTitle}>Today's {routineType} Routine</Text>
+          <Text style={styles.sectionTitle}>Today&apos;s {routineType} Routine</Text>
           <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
             <Ionicons
               name={isEditing ? "checkmark" : "create-outline"}

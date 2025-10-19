@@ -1,4 +1,3 @@
-// Dashboard.js
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -7,6 +6,7 @@ import {
   Animated,
   FlatList,
   Image,
+  ImageBackground,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { Circle, Svg } from "react-native-svg";
 
-// ----- SAMPLE DATA -----
+const image = require("../Images/Background.png");
 const PRODUCTS = [
   {
     id: "p1",
@@ -70,7 +70,6 @@ const DOCTORS = [
   }
 ];
 
-// Animated SVG Circle
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 function CircularProgress({ size = 90, strokeWidth = 8, percentage = 50, title }) {
@@ -91,7 +90,7 @@ function CircularProgress({ size = 90, strokeWidth = 8, percentage = 50, title }
     outputRange: [circumference, 0],
   });
 
-  const color = percentage < 50 ? "#e74c3c" : "#2ecc71";
+  const color = percentage < 50 ? "#760e02ff" : "#FF6E56";
 
   return (
     <View style={{ alignItems: "center" }}>
@@ -159,8 +158,10 @@ export default function Dashboard() {
 }, []);
 
   return (
-    <View style={styles.screen}>
-      {/* NAVBAR */}
+    <View style={styles.screen}
+    >
+       <ImageBackground source={image} resizeMode="cover" style={{flex: 1,width: '100%', height: '100%'}}>
+     
       <View style={styles.navbar}>
         <TouchableOpacity onPress={() => router.push("/Profile")} style={styles.navIcon}>
           <Ionicons name="person-circle-outline" size={28} color="#fff" />
@@ -178,7 +179,6 @@ export default function Dashboard() {
         </View>
       </View>
 
-      {/* Dropdown Menu */}
       {menuVisible && (
         <View style={styles.dropdown}>
           {menuLinks.map((item) => (
@@ -197,7 +197,7 @@ export default function Dashboard() {
       )}
 
       <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-        {/* Profile Row */}
+       
         <View style={styles.topRow}>
           <View style={styles.profileCard}>
             <View style={styles.profileImageWrap}>
@@ -211,7 +211,9 @@ export default function Dashboard() {
               />
             </View>
             <View style={styles.profileMeta}>
+              <TouchableOpacity onPress={() => router.push("/Profile")}>
               <Text style={styles.smallLabel}>See Detail</Text>
+              </TouchableOpacity>
               <Text style={styles.greetingSmall}>HEY 👋</Text>
               <Text style={styles.userName}>{userName}</Text>
             </View>
@@ -219,15 +221,27 @@ export default function Dashboard() {
 
           <View style={styles.progressColumn}>
             <View style={styles.smallCard}>
+              <TouchableOpacity onPress={() => router.push("/AnalysisResult")}>
               <CircularProgress percentage={averageScore} title="Average Skin Score" />
+              </TouchableOpacity>
             </View>
-            <View style={styles.smallCard}>
+            <View style={{backgroundColor: "#f5f8f9ff",
+    borderRadius: 12,
+    borderWidth: 8,
+    opacity: 0.8,
+    borderColor: "#09A386",
+    padding: 10,
+    marginBottom: 10,
+    alignItems: "center",}} >
+            <View >
+              <TouchableOpacity onPress={() => router.push("/MyRoutine")}>
               <CircularProgress percentage={routineScore} title="Routine Score" />
+              </TouchableOpacity>
+            </View>
             </View>
           </View>
         </View>
 
-        {/* Discover */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Discover</Text>
           <FlatList
@@ -245,7 +259,6 @@ export default function Dashboard() {
           />
         </View>
 
-        {/* Doctors */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Doctors</Text>
           <FlatList
@@ -263,6 +276,7 @@ export default function Dashboard() {
           />
         </View>
       </ScrollView>
+      </ImageBackground>
     </View>
   );
 }
@@ -270,7 +284,7 @@ export default function Dashboard() {
 const CORAL = "#000";
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#fff" },
+  screen: { flex: 1,backgroundImage: "url(./img/background.png)", backgroundSize: "cover" },
   navbar: {
     flexDirection: "row",
     alignItems: "center",
@@ -314,7 +328,7 @@ const styles = StyleSheet.create({
   profileImageWrap: {
     borderRadius: 14,
     borderWidth: 8,
-    borderColor: CORAL,
+    borderColor: "#FF6E56",
     overflow: "hidden",
   },
   profileImage: { width: "100%", height: 220 },
@@ -324,16 +338,17 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 8,
   },
-  smallLabel: { color: "#666", textAlign: "right", fontSize: 12 },
+  smallLabel: { color: "#FF6E56", textAlign: "right", fontSize: 12 },
   greetingSmall: { fontSize: 13, color: "#000" },
   userName: { fontSize: 18, fontWeight: "900", color: "#000" },
 
   progressColumn: { flex: 1 },
   smallCard: {
-    backgroundColor: "#fff",
+    backgroundColor: "#f5f8f9ff",
     borderRadius: 12,
     borderWidth: 8,
-    borderColor: "#000",
+    opacity: 0.8,
+    borderColor: "#0D81C3",
     padding: 10,
     marginBottom: 10,
     alignItems: "center",
@@ -353,6 +368,7 @@ const styles = StyleSheet.create({
     width: 140,
     borderRadius: 12,
     borderWidth: 1,
+        opacity: 0.9,
     borderColor: "#ddd",
     padding: 10,
     marginRight: 12,
@@ -364,7 +380,7 @@ const styles = StyleSheet.create({
   productSubtitle: { fontSize: 11, color: "#666" },
 
   doctorCard: {
-    width: 110,
+    width: 140,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "#ddd",
@@ -373,7 +389,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#fff",
   },
-  doctorImage: { width: 86, height: 86, borderRadius: 10, marginBottom: 8 },
+  doctorImage: { width: 110, height: 90, borderRadius: 10, marginBottom: 8 },
   doctorName: { fontSize: 12, fontWeight: "700", textAlign: "center" },
   doctorTitle: { fontSize: 11, color: "#666", textAlign: "center" },
 });

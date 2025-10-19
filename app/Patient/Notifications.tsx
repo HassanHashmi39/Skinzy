@@ -1,18 +1,35 @@
-import React, { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useState } from "react";
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function Notifications() {
-  const [notifications, setNotifications] = useState([
+  const [notifications, setNotifications] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Load notifications from storage
+  useEffect(() => {
+    const loadNotifications = async () => {
+      const stored = await AsyncStorage.getItem("notifications");
+      if (stored) setNotifications(JSON.parse(stored));
+      else setNotifications(sampleNotifications);
+    };
+    loadNotifications();
+  }, []);
+
+  // Sample defaults (only used if no saved data exists)
+  const sampleNotifications = [
     {
       id: "1",
       title: "Booking Confirmed",
-      message: "Your consultation with Dr. Ayesha Malik is scheduled for Oct 25, 2025 at 3:00 PM.",
+      message:
+        "Your consultation with Dr. Ayesha Malik is scheduled for Oct 25, 2025 at 3:00 PM.",
       time: "2 min ago",
       read: false,
     },
@@ -30,19 +47,33 @@ export default function Notifications() {
       time: "1 day ago",
       read: true,
     },
-  ]);
+  ];
 
-  const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+  const saveNotifications = async (data) => {
+    setNotifications(data);
+    await AsyncStorage.setItem("notifications", JSON.stringify(data));
+  };
+
+  const markAsRead = async (id) => {
+    const updated = notifications.map((n) =>
+      n.id === id ? { ...n, read: true } : n
     );
+    await saveNotifications(updated);
   };
 
-  const deleteNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  const deleteNotification = async (id) => {
+    const updated = notifications.filter((n) => n.id !== id);
+    await saveNotifications(updated);
   };
 
-  const renderItem = ({ item }: any) => (
+  const onRefresh = async () => {
+    setRefreshing(true);
+    const stored = await AsyncStorage.getItem("notifications");
+    if (stored) setNotifications(JSON.parse(stored));
+    setRefreshing(false);
+  };
+
+  const renderItem = ({ item }) => (
     <View
       style={[
         styles.card,
@@ -83,8 +114,15 @@ export default function Notifications() {
         data={notifications}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        ListEmptyComponent={
+          <Text style={{ textAlign: "center", color: "#777", marginTop: 30 }}>
+            No notifications yet.
+          </Text>
+        }
         contentContainerStyle={{ paddingBottom: 100 }}
-        showsVerticalScrollIndicator={false}
       />
     </View>
   );

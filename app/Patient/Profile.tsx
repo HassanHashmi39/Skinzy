@@ -51,7 +51,7 @@ export default function Profile() {
 
   const logout = async () => {
     await AsyncStorage.clear();
-    router.push("/Login");
+    router.push("/AuthScreen");
   };
 
   const pickImage = async () => {
@@ -130,7 +130,6 @@ export default function Profile() {
         />
       </View>
 
-      {/* Stats Section */}
       <View style={styles.stats}>
         <View style={styles.statBox}>
           <Text style={styles.statValue}>{historyCount}</Text>
@@ -146,7 +145,6 @@ export default function Profile() {
         </View>
       </View>
 
-      {/* Buttons */}
       <TouchableOpacity style={styles.saveBtn} onPress={saveProfile}>
         <Text style={styles.saveText}>💾 Save Changes</Text>
       </TouchableOpacity>
