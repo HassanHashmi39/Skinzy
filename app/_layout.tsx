@@ -6,7 +6,7 @@ export default function Layout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#000",
+        tabBarActiveTintColor: "#00e40fff",
         tabBarInactiveTintColor: "#999",
         tabBarStyle: {
           backgroundColor: "#fff",
@@ -25,41 +25,16 @@ export default function Layout() {
       }} />
 
     
-
-      <Tabs.Screen name="Consult" options={{
-        title: "Consult",
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="chatbubbles-outline" color={color} size={size} />
-        ),
-      }} />
-      <Tabs.Screen name="MyRoutine" options={{
-        title: "My Routine",
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="leaf-outline" color={color} size={size} />
-        ),
-      }} />
         <Tabs.Screen name="Measure" options={{
         title: "Analyze",
         tabBarIcon: ({ color, size }) => (
           <Ionicons name="scan-outline" color={color} size={size} />
         ),
       }} />
-      <Tabs.Screen name="Products" options={{
-        title: "Shop",
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="cart-outline" color={color} size={size} />
-        ),
-      }} />
       <Tabs.Screen name="AnalysisHistory" options={{
         title: "History",
         tabBarIcon: ({ color, size }) => (
           <Ionicons name="time-outline" color={color} size={size} />
-        ),
-      }} />
-      <Tabs.Screen name="MyBookings" options={{
-        title: "Bookings",
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="calendar-outline" color={color} size={size} />
         ),
       }} />
 
@@ -108,6 +83,22 @@ export default function Layout() {
     />
     <Tabs.Screen
     name="index"
+    options={{ href: null }}
+  />
+  <Tabs.Screen
+    name="MyBookings"
+    options={{ href: null }}
+  />
+  <Tabs.Screen
+    name="Consult"
+    options={{ href: null }}
+  />
+  <Tabs.Screen
+    name="Products"
+    options={{ href: null }}
+  />
+  <Tabs.Screen
+    name="MyRoutine"
     options={{ href: null }}
   />
 

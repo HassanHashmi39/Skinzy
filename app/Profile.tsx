@@ -41,8 +41,12 @@ export default function Profile() {
   }, []);
 
   const saveProfile = async () => {
-    await AsyncStorage.setItem("userProfile", JSON.stringify(profile));
-    Alert.alert("Profile Saved", "Your information has been updated.");
+    try {
+      await AsyncStorage.setItem("userProfile", JSON.stringify(profile));
+      Alert.alert("✅ Profile Saved", "Your information has been updated.");
+    } catch (error) {
+      Alert.alert("Error", "Failed to save profile.");
+    }
   };
 
   const logout = async () => {
@@ -188,10 +192,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  addText: {
-    color: "#000",
-    fontWeight: "600",
-  },
+  addText: { color: "#000", fontWeight: "600" },
   card: {
     borderWidth: 1,
     borderColor: "#000",
@@ -205,11 +206,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
-  label: {
-    color: "#000",
-    fontWeight: "600",
-    marginBottom: 5,
-  },
+  label: { color: "#000", fontWeight: "600", marginBottom: 5 },
   input: {
     borderWidth: 1,
     borderColor: "#000",
@@ -234,35 +231,20 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     backgroundColor: "#fff",
   },
-  statValue: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#000",
-  },
-  statLabel: {
-    fontSize: 12,
-    color: "#555",
-  },
+  statValue: { fontSize: 22, fontWeight: "bold", color: "#000" },
+  statLabel: { fontSize: 12, color: "#555" },
   saveBtn: {
     backgroundColor: "#000",
     borderRadius: 10,
     paddingVertical: 15,
     marginBottom: 15,
   },
-  saveText: {
-    color: "#fff",
-    textAlign: "center",
-    fontWeight: "bold",
-  },
+  saveText: { color: "#fff", textAlign: "center", fontWeight: "bold" },
   logoutBtn: {
     borderWidth: 1,
     borderColor: "#000",
     borderRadius: 10,
     paddingVertical: 15,
   },
-  logoutText: {
-    color: "#000",
-    textAlign: "center",
-    fontWeight: "bold",
-  },
+  logoutText: { color: "#000", textAlign: "center", fontWeight: "bold" },
 });
