@@ -1,29 +1,32 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams } from "expo-router"; // 👈 to receive params
 import React, { useState } from "react";
 import {
-    Alert,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function PatientDetail() {
+  const { name, age, gender, skinType, allergies, history } = useLocalSearchParams();
+
   const [doctorNote, setDoctorNote] = useState("");
   const [diagnosis, setDiagnosis] = useState("");
   const [notesList, setNotesList] = useState([]);
 
-  // Dummy patient data
+  // Dummy previous data (could be fetched via API later)
   const patient = {
-    name: "Ayesha Khan",
-    age: 25,
-    gender: "Female",
-    skinType: "Combination",
-    allergies: "None",
-    history: "Mild acne since teenage years, occasional dryness on cheeks.",
+    name: name || "Ayesha Khan",
+    age: age || 25,
+    gender: gender || "Female",
+    skinType: skinType || "Combination",
+    allergies: allergies || "None",
+    history: history || "Mild acne since teenage years.",
     analyses: [
       {
         id: 1,
@@ -156,26 +159,10 @@ export default function PatientDetail() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    padding: 20,
-    paddingTop: 50,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 20,
-  },
-  name: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#000",
-  },
-  sub: {
-    color: "#555",
-  },
+  container: { flex: 1, backgroundColor: "#fff", padding: 20, paddingTop: 50 },
+  header: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 20 },
+  name: { fontSize: 22, fontWeight: "bold", color: "#000" },
+  sub: { color: "#555" },
   card: {
     borderWidth: 1,
     borderColor: "#000",
@@ -184,16 +171,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     backgroundColor: "#fff",
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
-    marginBottom: 10,
-  },
-  info: {
-    color: "#333",
-    marginBottom: 5,
-  },
+  sectionTitle: { fontSize: 18, fontWeight: "bold", color: "#000", marginBottom: 10 },
+  info: { color: "#333", marginBottom: 5 },
   analysisCard: {
     flexDirection: "row",
     borderWidth: 1,
@@ -204,23 +183,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#fafafa",
     gap: 10,
   },
-  analysisImg: {
-    width: 70,
-    height: 70,
-    borderRadius: 8,
-  },
-  analysisDate: {
-    color: "#555",
-    fontSize: 12,
-  },
-  analysisResult: {
-    fontWeight: "bold",
-    color: "#000",
-  },
-  analysisText: {
-    color: "#333",
-    fontSize: 13,
-  },
+  analysisImg: { width: 70, height: 70, borderRadius: 8 },
+  analysisDate: { color: "#555", fontSize: 12 },
+  analysisResult: { fontWeight: "bold", color: "#000" },
+  analysisText: { color: "#333", fontSize: 13 },
   prescriptionCard: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -242,10 +208,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignItems: "center",
   },
-  btnText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+  btnText: { color: "#fff", fontWeight: "bold" },
   noteCard: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -254,8 +217,5 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: "#fafafa",
   },
-  bold: {
-    fontWeight: "600",
-    color: "#000",
-  },
+  bold: { fontWeight: "600", color: "#000" },
 });

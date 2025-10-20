@@ -1,229 +1,156 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import {
-  FlatList,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { FlatList, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+const image = require("../Images/Background.png");
+
+const PATIENTS = [
+  { id: "p1", name: "Ayesha Khan", age: 25, issue: "Acne Treatment", img: "https://randomuser.me/api/portraits/women/65.jpg" },
+  { id: "p2", name: "Ali Raza", age: 30, issue: "Dark Spots", img: "https://randomuser.me/api/portraits/men/75.jpg" },
+  { id: "p3", name: "Sara Ahmed", age: 22, issue: "Pigmentation", img: "https://randomuser.me/api/portraits/women/45.jpg" },
+  { id: "p4", name: "Bilal Malik", age: 28, issue: "Skin Sensitivity", img: "https://randomuser.me/api/portraits/men/43.jpg" },
+];
 
 export default function DoctorDashboard() {
-  const [doctor, setDoctor] = useState({
-    name: "Dr. Ayesha Malik",
-    specialization: "Dermatologist",
-    experience: "7 Years",
-    clinic: "SkinGlow Clinic, Lahore",
-  });
+  const router = useRouter();
+  const [doctorName, setDoctorName] = useState("Doctor");
+  const [profileImage, setProfileImage] = useState(null);
 
-  const [stats, setStats] = useState({
-    totalPatients: 320,
-    todayAppointments: 5,
-    pendingConsults: 2,
-    earnings: "45,000 PKR",
-  });
-
-  const [appointments, setAppointments] = useState([
-    {
-      id: "1",
-      patient: "Sara Khan",
-      time: "10:00 AM",
-      status: "Confirmed",
-      issue: "Acne & Oil Control",
-    },
-    {
-      id: "2",
-      patient: "Ali Raza",
-      time: "12:30 PM",
-      status: "Pending",
-      issue: "Dark Spots",
-    },
-  ]);
-
+  // Load profile data from AsyncStorage
   useEffect(() => {
-    // Later connect to backend for dynamic doctor data
+    const loadDoctorProfile = async () => {
+      try {
+        const storedProfile = await AsyncStorage.getItem("doctorProfile");
+        if (storedProfile) {
+          const data = JSON.parse(storedProfile);
+          setDoctorName(data.name || "Doctor");
+          setProfileImage(data.image || null);
+        }
+      } catch (error) {
+        console.log("Error loading doctor profile:", error);
+      }
+    };
+    loadDoctorProfile();
+
+    // Listen for screen focus to refresh data when returning from Profile
+    const unsubscribe = router.addListener?.("focus", loadDoctorProfile);
+    return unsubscribe;
   }, []);
 
-  const renderAppointment = ({ item }) => (
-    <View style={styles.appointmentCard}>
-      <View>
-        <Text style={styles.patientName}>{item.patient}</Text>
-        <Text style={styles.issueText}>{item.issue}</Text>
-        <Text style={styles.timeText}>{item.time}</Text>
-      </View>
-      <TouchableOpacity
-        style={[
-          styles.statusBtn,
-          item.status === "Confirmed"
-            ? { backgroundColor: "#000" }
-            : { backgroundColor: "#888" },
-        ]}
-      >
-        <Text style={styles.statusText}>{item.status}</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
   return (
-    <ScrollView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Welcome, {doctor.name}</Text>
-        <Text style={styles.subtitle}>{doctor.specialization}</Text>
-      </View>
+    <View style={styles.screen}>
+      <ImageBackground source={image} resizeMode="cover" style={styles.bg}>
+        {/* Navbar */}
+        <View style={styles.navbar}>
+          <TouchableOpacity onPress={() => router.push("/Doctor/DoctorProfile")} style={styles.navIcon}>
+            <Ionicons name="person-circle-outline" size={28} color="#fff" />
+          </TouchableOpacity>
 
-      {/* Stats */}
-      <View style={styles.statsContainer}>
-        {Object.entries(stats).map(([key, value]) => (
-          <View style={styles.statBox} key={key}>
-            <Text style={styles.statValue}>{value}</Text>
-            <Text style={styles.statLabel}>
-              {key.replace(/([A-Z])/g, " $1").trim()}
-            </Text>
+          <Text style={styles.appTitle}>DOCTOR PANEL</Text>
+
+          <View style={styles.navRight}>
+            <TouchableOpacity onPress={() => router.push("/Doctor/DoctorNotifications")} style={styles.navIcon}>
+              <Ionicons name="notifications-outline" size={22} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/Doctor/DoctorChat")} style={styles.navIcon}>
+              <Ionicons name="chatbubble-ellipses-outline" size={24} color="#fff" />
+            </TouchableOpacity>
           </View>
-        ))}
-      </View>
+        </View>
 
-      {/* Today&apos;s Appointments */}
-      <Text style={styles.sectionTitle}>Today&apos;s Appointments</Text>
-      <FlatList
-        data={appointments}
-        keyExtractor={(item) => item.id}
-        renderItem={renderAppointment}
-        scrollEnabled={false}
-        ListEmptyComponent={
-          <Text style={{ color: "#555", textAlign: "center" }}>
-            No appointments today.
-          </Text>
-        }
-      />
+        {/* Doctor Info */}
+        <View style={styles.profileSection}>
+          <Image
+            source={{
+              uri:
+                profileImage ||
+                "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+            }}
+            style={styles.profileImage}
+          />
+          <View style={{ marginLeft: 12 }}>
+            <Text style={styles.greeting}>Welcome Back 👋</Text>
+            <Text style={styles.name}>{doctorName}</Text>
+            <Text style={styles.subText}>Dermatologist</Text>
+          </View>
+        </View>
 
-      {/* Quick Actions */}
-      <Text style={styles.sectionTitle}>Quick Actions</Text>
-      <View style={styles.actions}>
-        <TouchableOpacity style={styles.actionBtn}>
-          <Ionicons name="chatbubbles-outline" size={22} color="#000" />
-          <Text style={styles.actionText}>Messages</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.actionBtn}>
-          <Ionicons name="calendar-outline" size={22} color="#000" />
-          <Text style={styles.actionText}>Schedule</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.actionBtn}>
-          <Ionicons name="people-outline" size={22} color="#000" />
-          <Text style={styles.actionText}>Patients</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.actionBtn}>
-          <Ionicons name="stats-chart-outline" size={22} color="#000" />
-          <Text style={styles.actionText}>Reports</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+        {/* Patients Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>My Patients</Text>
+          <FlatList
+            data={PATIENTS}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.patientCard}
+                onPress={() =>
+                  router.push({ pathname: "/PatientDetail", params: { id: item.id } })
+                }
+              >
+                <Image source={{ uri: item.img }} style={styles.patientImg} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.patientName}>{item.name}</Text>
+                  <Text style={styles.patientInfo}>
+                    {item.age} yrs | {item.issue}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward-outline" size={20} color="#999" />
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+      </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  screen: { flex: 1, backgroundColor: "#fff" },
+  bg: { flex: 1, width: "100%", height: "100%" },
+  navbar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#000",
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 14,
+  },
+  appTitle: { color: "#fff", fontWeight: "900", fontSize: 20, letterSpacing: 1 },
+  navRight: { flexDirection: "row", alignItems: "center" },
+  navIcon: { marginHorizontal: 8 },
+
+  profileSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 20,
+    marginHorizontal: 20,
     backgroundColor: "#fff",
-    paddingTop: 50,
-    paddingHorizontal: 20,
+    borderRadius: 14,
+    padding: 10,
+    elevation: 3,
   },
-  header: {
-    marginBottom: 25,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#000",
-  },
-  subtitle: {
-    color: "#555",
-    fontSize: 15,
-  },
-  statsContainer: {
+  profileImage: { width: 70, height: 70, borderRadius: 40 },
+  greeting: { fontSize: 13, color: "#555" },
+  name: { fontSize: 18, fontWeight: "900", color: "#000" },
+  subText: { fontSize: 12, color: "#777" },
+
+  section: { flex: 1, marginTop: 20, paddingHorizontal: 20 },
+  sectionTitle: { fontSize: 18, fontWeight: "800", marginBottom: 10, color: "#000" },
+  patientCard: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    marginBottom: 25,
-  },
-  statBox: {
-    width: "48%",
-    borderWidth: 1,
-    borderColor: "#000",
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 10,
-  },
-  statValue: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
-  },
-  statLabel: {
-    color: "#555",
-    fontSize: 13,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
-    marginBottom: 10,
-    marginTop: 10,
-  },
-  appointmentCard: {
-    borderWidth: 1,
-    borderColor: "#000",
-    borderRadius: 10,
-    padding: 15,
-    flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
-  },
-  patientName: {
-    fontWeight: "bold",
-    color: "#000",
-    fontSize: 15,
-  },
-  issueText: {
-    color: "#555",
-  },
-  timeText: {
-    color: "#333",
-    marginTop: 3,
-  },
-  statusBtn: {
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-  },
-  statusText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  actions: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    marginTop: 15,
-  },
-  actionBtn: {
-    width: "48%",
-    borderWidth: 1,
-    borderColor: "#000",
-    borderRadius: 10,
-    paddingVertical: 15,
-    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 10,
     marginBottom: 10,
+    elevation: 2,
   },
-  actionText: {
-    color: "#000",
-    fontWeight: "bold",
-    marginTop: 6,
-  },
+  patientImg: { width: 55, height: 55, borderRadius: 30, marginRight: 10 },
+  patientName: { fontWeight: "700", fontSize: 14, color: "#000" },
+  patientInfo: { color: "#777", fontSize: 12 },
 });

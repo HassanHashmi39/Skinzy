@@ -1,77 +1,39 @@
 import { useRouter } from "expo-router";
-import React, { useEffect } from "react";
-import { Animated, Easing, Image, StyleSheet, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-export default function SplashScreen() {
+export default function SelectionPage() {
   const router = useRouter();
-  const fadeAnim = new Animated.Value(0);
-  const scaleAnim = new Animated.Value(0.8);
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-        easing: Easing.ease,
-      }),
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    const timeout = setTimeout(() => {
-      router.push("./AuthScreen"); 
-    }, 3000);
-
-    return () => clearTimeout(timeout);
-  }, []);
 
   return (
     <View style={styles.container}>
-        <Image source={require('./Images/logo.png')} style={{width:150, height:150, marginBottom:20}} >
+      <Text style={styles.title}>Select Your Role</Text>
 
-        </Image>
-      <Animated.Text
-        style={[
-          styles.logoText,
-          {
-            opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
+      <TouchableOpacity
+        style={[styles.btn, { backgroundColor: "#4CAF50" }]}
+        onPress={() => router.replace("/user/UserInfoScreen")}
       >
-        SKINZY
-      </Animated.Text>
-      <Animated.Text style={[styles.tagline, { opacity: fadeAnim }]}>
-        AI Skincare & Wellness
-      </Animated.Text>
-      <Animated.Text style={[styles.tagline, { opacity: fadeAnim }]}>
-        Signup to Look Good & Feel Great!
-      </Animated.Text>
+        <Text style={styles.text}>Continue as Patient</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.btn, { backgroundColor: "#2196F3" }]}
+        onPress={() => router.replace("/Doctor/DoctorInformationForm")}
+      >
+        <Text style={styles.text}>Continue as Doctor</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff", // white background
+  container: { flex: 1, justifyContent: "center", alignItems: "center" },
+  title: { fontSize: 22, marginBottom: 30 },
+  btn: {
+    width: 220,
+    padding: 14,
+    borderRadius: 10,
+    marginVertical: 10,
     alignItems: "center",
-    justifyContent: "center",
   },
-  logoText: {
-    fontSize: 40,
-    fontWeight: "bold",
-    color: "#000", // black text
-    letterSpacing: 3,
-  },
-  tagline: {
-    fontSize: 14,
-    color: "#000",
-    marginTop: 8,
-    letterSpacing: 1,
-  },
+  text: { color: "#fff", fontWeight: "600" },
 });
