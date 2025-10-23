@@ -31,7 +31,7 @@ export default function HealthInfoScreen() {
       return;
     }
     Alert.alert("Saved ✅", "Your health and skin info has been recorded.");
-    router.push("/PermissionsScreen"); 
+    router.push("/user/PermissionsScreen"); 
   };
 
   return (

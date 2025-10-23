@@ -1,50 +1,84 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
-export default function DoctorAppointments() {
-  const [appointments, setAppointments] = useState([
-    {
-      id: "1",
-      patientName: "Ahsan Shah",
-      date: "2025-10-21",
-      time: "2:00 PM",
-      status: "Pending",
-      issue: "Acne and oily skin",
-    },
-    {
-      id: "2",
-      patientName: "Sana Fatima",
-      date: "2025-10-22",
-      time: "4:00 PM",
-      status: "Accepted",
-      issue: "Pigmentation and dryness",
-    },
-    {
-      id: "3",
-      patientName: "Ali Khan",
-      date: "2025-10-19",
-      time: "5:00 PM",
-      status: "Completed",
-      issue: "Dark circles and dull skin",
-    },
-  ]);
+interface Appointment {
+  id: string;
+  patientName: string;
+  date: string;
+  time: string;
+  status: string;
+  issue: string;
+}
 
-  const updateStatus = (id, newStatus) => {
-    setAppointments((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, status: newStatus } : a))
+export default function DoctorAppointments() {
+  const router = useRouter();
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+
+  // Load appointments from AsyncStorage
+  useEffect(() => {
+    const loadAppointments = async () => {
+      try {
+        const storedAppointments = await AsyncStorage.getItem("doctorAppointments");
+        if (storedAppointments) {
+          setAppointments(JSON.parse(storedAppointments));
+        } else {
+          // Default appointments if none stored
+          const defaultAppointments = [
+            {
+              id: "1",
+              patientName: "Ahsan Shah",
+              date: "2025-10-21",
+              time: "2:00 PM",
+              status: "Pending",
+              issue: "Acne and oily skin",
+            },
+            {
+              id: "2",
+              patientName: "Sana Fatima",
+              date: "2025-10-22",
+              time: "4:00 PM",
+              status: "Accepted",
+              issue: "Pigmentation and dryness",
+            },
+            {
+              id: "3",
+              patientName: "Ali Khan",
+              date: "2025-10-19",
+              time: "5:00 PM",
+              status: "Completed",
+              issue: "Dark circles and dull skin",
+            },
+          ];
+          setAppointments(defaultAppointments);
+          await AsyncStorage.setItem("doctorAppointments", JSON.stringify(defaultAppointments));
+        }
+      } catch (error) {
+        console.log("Error loading appointments:", error);
+      }
+    };
+    loadAppointments();
+  }, []);
+
+  const updateStatus = async (id: string, newStatus: string) => {
+    const updatedAppointments = appointments.map((a) =>
+      a.id === id ? { ...a, status: newStatus } : a
     );
+    setAppointments(updatedAppointments);
+    await AsyncStorage.setItem("doctorAppointments", JSON.stringify(updatedAppointments));
     Alert.alert("Status Updated", `Appointment marked as ${newStatus}.`);
   };
 
-  const renderItem = ({ item }) => {
+  const renderItem = ({ item }: { item: Appointment }) => {
     const isPending = item.status === "Pending";
     const isAccepted = item.status === "Accepted";
 
@@ -110,6 +144,24 @@ export default function DoctorAppointments() {
 
   return (
     <View style={styles.container}>
+      {/* Navbar */}
+      <View style={styles.navbar}>
+        <TouchableOpacity onPress={() => router.push("/Doctor/DoctorProfile")} style={styles.navIcon}>
+          <Ionicons name="person-circle-outline" size={28} color="#fff" />
+        </TouchableOpacity>
+
+        <Text style={styles.appTitle}>DOCTOR PANEL</Text>
+
+        <View style={styles.navRight}>
+          <TouchableOpacity onPress={() => router.push("/Doctor/DoctorNotifications")} style={styles.navIcon}>
+            <Ionicons name="notifications-outline" size={22} color="#FF6E56" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push("/Doctor/DoctorChat")} style={styles.navIcon}>
+            <Ionicons name="chatbubble-ellipses-outline" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <Text style={styles.title}>Appointments</Text>
       <Text style={styles.subtitle}>Manage your patient consultations</Text>
 
@@ -133,14 +185,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingHorizontal: 20,
-    paddingTop: 50,
   },
+  navbar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#000",
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 14,
+  },
+  appTitle: { color: "#fff", fontWeight: "900", fontSize: 20, letterSpacing: 1 },
+  navRight: { flexDirection: "row", alignItems: "center" },
+  navIcon: { marginHorizontal: 8 },
   title: {
     fontSize: 26,
     fontWeight: "bold",
     color: "#000",
     textAlign: "center",
+    marginTop: 20,
   },
   subtitle: {
     color: "#555",

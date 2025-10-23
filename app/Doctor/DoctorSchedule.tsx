@@ -1,16 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    FlatList,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function DoctorSchedule() {
+  const router = useRouter();
   const [slots, setSlots] = useState([
     { id: "1", day: "Monday", time: "10:00 AM - 1:00 PM" },
     { id: "2", day: "Wednesday", time: "3:00 PM - 6:00 PM" },
@@ -36,7 +38,7 @@ export default function DoctorSchedule() {
     setNewTime("");
   };
 
-  const deleteSlot = (id) => {
+  const deleteSlot = (id: string) => {
     Alert.alert("Confirm Delete", "Are you sure you want to remove this slot?", [
       { text: "Cancel", style: "cancel" },
       {
@@ -46,7 +48,7 @@ export default function DoctorSchedule() {
     ]);
   };
 
-  const renderSlot = ({ item }) => (
+  const renderSlot = ({ item }: { item: { id: string; day: string; time: string } }) => (
     <View style={styles.slotCard}>
       <View>
         <Text style={styles.day}>{item.day}</Text>
@@ -60,6 +62,24 @@ export default function DoctorSchedule() {
 
   return (
     <View style={styles.container}>
+      {/* Navbar */}
+      <View style={styles.navbar}>
+        <TouchableOpacity onPress={() => router.push("/Doctor/DoctorProfile")} style={styles.navIcon}>
+          <Ionicons name="person-circle-outline" size={28} color="#fff" />
+        </TouchableOpacity>
+
+        <Text style={styles.appTitle}>DOCTOR PANEL</Text>
+
+        <View style={styles.navRight}>
+          <TouchableOpacity onPress={() => router.push("/Doctor/DoctorNotifications")} style={styles.navIcon}>
+            <Ionicons name="notifications-outline" size={22} color="#FF6E56" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push("/Doctor/DoctorChat")} style={styles.navIcon}>
+            <Ionicons name="chatbubble-ellipses-outline" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <Text style={styles.title}>Manage Your Schedule</Text>
       <Text style={styles.subtitle}>
         Set your available consultation timings
@@ -105,14 +125,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: 50,
-    paddingHorizontal: 20,
   },
+  navbar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#000",
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 14,
+  },
+  appTitle: { color: "#fff", fontWeight: "900", fontSize: 20, letterSpacing: 1 },
+  navRight: { flexDirection: "row", alignItems: "center" },
+  navIcon: { marginHorizontal: 8 },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#000",
     textAlign: "center",
+    marginTop: 20,
   },
   subtitle: {
     textAlign: "center",

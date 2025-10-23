@@ -1,17 +1,19 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function DoctorNotifications() {
-  const [notifications, setNotifications] = useState([]);
+  const router = useRouter();
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   useEffect(() => {
     loadNotifications();
@@ -60,7 +62,7 @@ export default function DoctorNotifications() {
   };
 
   // Mark a notification as read
-  const markAsRead = async (id) => {
+  const markAsRead = async (id: string) => {
     const updated = notifications.map((n) =>
       n.id === id ? { ...n, read: true } : n
     );
@@ -69,7 +71,7 @@ export default function DoctorNotifications() {
   };
 
   // Delete a notification
-  const deleteNotification = async (id) => {
+  const deleteNotification = async (id: string) => {
     const updated = notifications.filter((n) => n.id !== id);
     setNotifications(updated);
     await AsyncStorage.setItem("doctorNotifications", JSON.stringify(updated));
@@ -89,7 +91,7 @@ export default function DoctorNotifications() {
     ]);
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }: { item: any }) => (
     <View
       style={[
         styles.card,

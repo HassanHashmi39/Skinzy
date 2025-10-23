@@ -40,7 +40,7 @@ export default function AnalysisHistory() {
   };
 
   const handleView = (item) => {
-    router.push({ pathname: "/AnalysisResult", params: item });
+    router.push({ pathname: "/user/AnalysisResult", params: item });
   };
 
   // Stats
@@ -50,6 +50,18 @@ export default function AnalysisHistory() {
       ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1)
       : 0;
   const bestScore = scores.length > 0 ? Math.max(...scores) : 0;
+
+  // Save average score to AsyncStorage
+  useEffect(() => {
+    const saveAvgScore = async () => {
+      try {
+        await AsyncStorage.setItem("averageSkinScore", avgScore.toString());
+      } catch (e) {
+        console.log("Error saving average skin score", e);
+      }
+    };
+    saveAvgScore();
+  }, [avgScore]);
 
   const chartData = {
     labels: history.slice(0, 5).map((h) => h.date),

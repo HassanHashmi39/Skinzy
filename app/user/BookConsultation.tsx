@@ -52,7 +52,8 @@ export default function BookConsultation() {
       });
 
       // ---- Save booking locally ----
-      const existing = JSON.parse(await AsyncStorage.getItem("bookings")) || [];
+      const bookingsStr = await AsyncStorage.getItem("bookings");
+      const existing = bookingsStr ? JSON.parse(bookingsStr) : [];
       const newBooking = {
         id: Date.now(),
         doctor: doctor || "General Dermatologist",
@@ -66,7 +67,7 @@ export default function BookConsultation() {
       await AsyncStorage.setItem("bookings", JSON.stringify(existing));
 
       // ---- Navigate to success screen ----
-      router.push("/BookingSuccess");
+      router.push("/user/BookingSuccess");
 
       // ---- Reset form ----
       setFormData({

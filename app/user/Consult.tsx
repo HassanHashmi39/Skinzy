@@ -9,11 +9,19 @@ import {
   View,
 } from "react-native";
 
+type Doctor = {
+  id: string;
+  name: string;
+  specialization: string;
+  experience: string;
+  image: string;
+};
+
 export default function Consult() {
   const router = useRouter();
 
   // Temporary doctor list (can later come from backend)
-  const doctors = [
+  const doctors: Doctor[] = [
     {
       id: "1",
       name: "Dr. Ayesha Malik",
@@ -42,12 +50,12 @@ export default function Consult() {
 
   const handleBook = (doctorName: string) => {
     router.push({
-      pathname: "/BookConsultation",
+      pathname: "/user/BookConsultation",
       params: { doctor: doctorName },
     });
   };
 
-  const renderDoctor = ({ item }: any) => (
+  const renderDoctor = ({ item }: { item: Doctor }) => (
     <View style={styles.card}>
       <Image source={{ uri: item.image }} style={styles.image} />
       <View style={styles.info}>
@@ -88,7 +96,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     paddingHorizontal: 20,
-    paddingTop: 40,
+      
   },
   header: {
     fontSize: 26,

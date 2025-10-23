@@ -1,19 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    Alert,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function DoctorProfile() {
+  const router = useRouter();
   const [doctor, setDoctor] = useState({
     name: "",
     specialization: "",
@@ -21,7 +23,7 @@ export default function DoctorProfile() {
     email: "",
     phone: "",
     bio: "",
-    image: null,
+    image: null as string | null,
   });
 
   useEffect(() => {
@@ -152,13 +154,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     paddingHorizontal: 20,
-    paddingTop: 50,
   },
+  navbar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#000",
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 14,
+  },
+  appTitle: { color: "#fff", fontWeight: "900", fontSize: 20, letterSpacing: 1 },
+  navRight: { flexDirection: "row", alignItems: "center" },
+  navIcon: { marginHorizontal: 8 },
   title: {
     fontSize: 26,
     fontWeight: "bold",
     color: "#000",
     marginBottom: 20,
+    marginTop: 20,
     textAlign: "center",
   },
   imageContainer: {

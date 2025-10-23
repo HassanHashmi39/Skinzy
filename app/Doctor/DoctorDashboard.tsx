@@ -16,7 +16,7 @@ const PATIENTS = [
 export default function DoctorDashboard() {
   const router = useRouter();
   const [doctorName, setDoctorName] = useState("Doctor");
-  const [profileImage, setProfileImage] = useState(null);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
 
   // Load profile data from AsyncStorage
   useEffect(() => {
@@ -35,8 +35,8 @@ export default function DoctorDashboard() {
     loadDoctorProfile();
 
     // Listen for screen focus to refresh data when returning from Profile
-    const unsubscribe = router.addListener?.("focus", loadDoctorProfile);
-    return unsubscribe;
+    // const unsubscribe = router.addListener?.("focus", loadDoctorProfile);
+    // return unsubscribe;
   }, []);
 
   return (
@@ -52,7 +52,7 @@ export default function DoctorDashboard() {
 
           <View style={styles.navRight}>
             <TouchableOpacity onPress={() => router.push("/Doctor/DoctorNotifications")} style={styles.navIcon}>
-              <Ionicons name="notifications-outline" size={22} color="#fff" />
+              <Ionicons name="notifications-outline" size={22} color="#FF6E56" />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => router.push("/Doctor/DoctorChat")} style={styles.navIcon}>
               <Ionicons name="chatbubble-ellipses-outline" size={24} color="#fff" />
@@ -87,9 +87,12 @@ export default function DoctorDashboard() {
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.patientCard}
-                onPress={() =>
-                  router.push({ pathname: "/PatientDetail", params: { id: item.id } })
-                }
+                onPress={() => {
+                  router.push({
+                    pathname: "/Doctor/PatientDetail",
+                    params: item,
+                  });
+                }}
               >
                 <Image source={{ uri: item.img }} style={styles.patientImg} />
                 <View style={{ flex: 1 }}>

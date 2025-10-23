@@ -72,7 +72,7 @@ const DOCTORS = [
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-function CircularProgress({ size = 90, strokeWidth = 8, percentage = 50, title }) {
+function CircularProgress({ size = 90, strokeWidth = 8, percentage = 50, title }: { size?: number; strokeWidth?: number; percentage: number; title?: string }) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const animated = useRef(new Animated.Value(0)).current;
@@ -83,7 +83,7 @@ function CircularProgress({ size = 90, strokeWidth = 8, percentage = 50, title }
       duration: 1000,
       useNativeDriver: false,
     }).start();
-  }, [percentage]);
+  }, [percentage, animated]);
 
   const strokeDashoffset = animated.interpolate({
     inputRange: [0, 100],
@@ -128,17 +128,17 @@ export default function Dashboard() {
   const [profileImage, setProfileImage] = useState(null);
   const [userName, setUserName] = useState("User");
 
-  const averageScore = 76;
-  const routineScore = 88;
+  const [averageScore, setAverageScore] = useState(76);
+  const [routineScore, setRoutineScore] = useState(0);
 
   const toggleMenu = () => setMenuVisible(!menuVisible);
 
-  const menuLinks = [
-    { label: "🧴 My Routine", path: "/MyRoutine" },
-    { label: "🛍️ Products", path: "/Products" },
-    { label: "👨‍⚕️ Doctors", path: "/Consult" },
-    { label: "📄 Profile", path: "/Profile" },
-    { label: "🗓 Bookings " ,path: "/MyBookings" }
+  const menuLinks: { label: string; path: "/user/MyRoutine" | "/user/Products" | "/user/Consult" | "/user/Profile" | "/user/MyBookings" }[] = [
+    { label: "🧴 My Routine", path: "/user/MyRoutine" },
+    { label: "🛍️ Products", path: "/user/Products" },
+    { label: "👨‍⚕️ Doctors", path: "/user/Consult" },
+    { label: "📄 Profile", path: "/user/Profile" },
+    { label: "🗓 Bookings", path: "/user/MyBookings" }
   ];
 
   useEffect(() => {
@@ -157,24 +157,52 @@ export default function Dashboard() {
   loadProfile();
 }, []);
 
+  useEffect(() => {
+    const loadRoutineScore = async () => {
+      try {
+        const savedScore = await AsyncStorage.getItem("routineScore");
+        if (savedScore) {
+          setRoutineScore(parseInt(savedScore));
+        }
+      } catch (e) {
+        console.log("Error loading routine score:", e);
+      }
+    };
+    loadRoutineScore();
+  }, []);
+
+  useEffect(() => {
+    const loadAverageScore = async () => {
+      try {
+        const savedScore = await AsyncStorage.getItem("averageSkinScore");
+        if (savedScore) {
+          setAverageScore(parseFloat(savedScore));
+        }
+      } catch (e) {
+        console.log("Error loading average skin score:", e);
+      }
+    };
+    loadAverageScore();
+  }, []);
+
   return (
     <View style={styles.screen}
     >
        <ImageBackground source={image} resizeMode="cover" style={{flex: 1,width: '100%', height: '100%'}}>
      
       <View style={styles.navbar}>
-        <TouchableOpacity onPress={() => router.push("/Profile")} style={styles.navIcon}>
-          <Ionicons name="person-circle-outline" size={28} color="#fff" />
+        <TouchableOpacity onPress={() => router.push("/user/Profile")} style={styles.navIcon}>
+          <Ionicons name="person-circle-outline" size={28} color="black" />
         </TouchableOpacity>
 
         <Text style={styles.appTitle}>SKINZY</Text>
 
         <View style={styles.navRight}>
-          <TouchableOpacity onPress={() => router.push("/Notifications")} style={styles.navIcon}>
-            <Ionicons name="notifications-outline" size={22} color="#fff" />
+          <TouchableOpacity onPress={() => router.push("/user/Notifications")} style={styles.navIcon}>
+            <Ionicons name="notifications-outline" size={22} color="#FF6E56" />
           </TouchableOpacity>
           <TouchableOpacity onPress={toggleMenu} style={styles.navIcon}>
-            <Ionicons name="menu-outline" size={26} color="#fff" />
+            <Ionicons name="menu-outline" size={26} color="black" />
           </TouchableOpacity>
         </View>
       </View>
@@ -211,7 +239,7 @@ export default function Dashboard() {
               />
             </View>
             <View style={styles.profileMeta}>
-              <TouchableOpacity onPress={() => router.push("/Profile")}>
+              <TouchableOpacity onPress={() => router.push("/user/Profile")}>
               <Text style={styles.smallLabel}>See Detail</Text>
               </TouchableOpacity>
               <Text style={styles.greetingSmall}>HEY 👋</Text>
@@ -221,7 +249,7 @@ export default function Dashboard() {
 
           <View style={styles.progressColumn}>
             <View style={styles.smallCard}>
-              <TouchableOpacity onPress={() => router.push("/AnalysisResult")}>
+              <TouchableOpacity onPress={() => router.push("/user/AnalysisHistory")}>
               <CircularProgress percentage={averageScore} title="Average Skin Score" />
               </TouchableOpacity>
             </View>
@@ -234,7 +262,7 @@ export default function Dashboard() {
     marginBottom: 10,
     alignItems: "center",}} >
             <View >
-              <TouchableOpacity onPress={() => router.push("/MyRoutine")}>
+              <TouchableOpacity onPress={() => router.push("/user/MyRoutine")}>
               <CircularProgress percentage={routineScore} title="Routine Score" />
               </TouchableOpacity>
             </View>
@@ -289,12 +317,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: CORAL,
+    backgroundColor: "white",
     paddingHorizontal: 16,
     paddingTop: 20,
     paddingBottom: 14,
   },
-  appTitle: { color: "#fff", fontWeight: "900", fontSize: 20, letterSpacing: 2 },
+  appTitle: { color: "black", fontWeight: "900", fontSize: 20, letterSpacing: 2 },
   navRight: { flexDirection: "row", alignItems: "center" },
   navIcon: { marginHorizontal: 8 },
 

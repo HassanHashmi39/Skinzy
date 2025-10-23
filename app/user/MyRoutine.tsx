@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -12,14 +13,27 @@ import {
 } from "react-native";
 
 export default function MyRoutine() {
-  const [routineType, setRoutineType] = useState("Morning");
+  const [menuVisible, setMenuVisible] = useState(false);
+  const router = useRouter();
+
+  const toggleMenu = () => setMenuVisible(!menuVisible);
+
+  const menuLinks: { label: string; path: "/user/MyRoutine" | "/user/Products" | "/user/Consult" | "/user/Profile" | "/user/MyBookings" }[] = [
+    { label: "🧴 My Routine", path: "/user/MyRoutine" },
+    { label: "🛍️ Products", path: "/user/Products" },
+    { label: "👨‍⚕️ Doctors", path: "/user/Consult"},
+    { label: "📄 Profile", path: "/user/Profile" },
+    { label: "🗓 Bookings", path: "/user/MyBookings" }
+  ];
+
+  const [routineType, setRoutineType] = useState<"Morning" | "Night">("Morning");
   const [waterIntake, setWaterIntake] = useState(0);
   const waterGoal = 8;
-  const [plan, setPlan] = useState({
+  const [plan, setPlan] = useState<Record<"Morning" | "Night", string[]>>({
     Morning: ["Cleanser", "Toner", "Moisturizer", "Sunscreen (SPF 50)"],
     Night: ["Cleanser", "Serum", "Moisturizer", "Lip Balm"],
   });
-  const [steps, setSteps] = useState([]);
+  const [steps, setSteps] = useState<{ name: string; done: boolean }[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [newStep, setNewStep] = useState("");
 
@@ -42,16 +56,16 @@ export default function MyRoutine() {
         } else if (savedWater) setWaterIntake(parseInt(savedWater));
 
         // Restore user plan and today's steps
-        if (savedPlan) setPlan(JSON.parse(savedPlan));
+        if (savedPlan) setPlan(JSON.parse(savedPlan) as Record<"Morning" | "Night", string[]>);
         if (savedProgress) {
-          const parsed = JSON.parse(savedProgress);
+          const parsed = JSON.parse(savedProgress) as Record<"Morning" | "Night", { name: string; done: boolean }[]>;
           if (parsed[routineType]) setSteps(parsed[routineType]);
         } else {
           setSteps(
             (savedPlan
-              ? JSON.parse(savedPlan)[routineType]
+              ? (JSON.parse(savedPlan) as Record<"Morning" | "Night", string[]>)[routineType]
               : plan[routineType]
-            ).map((s) => ({ name: s, done: false }))
+            ).map((s: string) => ({ name: s, done: false }))
           );
         }
       } catch (e) {
@@ -66,11 +80,11 @@ export default function MyRoutine() {
     (async () => {
       const savedProgress = await AsyncStorage.getItem("routineProgress");
       if (savedProgress) {
-        const parsed = JSON.parse(savedProgress);
+        const parsed = JSON.parse(savedProgress) as Record<"Morning" | "Night", { name: string; done: boolean }[]>;
         if (parsed[routineType]) setSteps(parsed[routineType]);
-        else setSteps(plan[routineType].map((s) => ({ name: s, done: false })));
+        else setSteps(plan[routineType].map((s: string) => ({ name: s, done: false })));
       } else {
-        setSteps(plan[routineType].map((s) => ({ name: s, done: false })));
+        setSteps(plan[routineType].map((s: string) => ({ name: s, done: false })));
       }
     })();
   }, [routineType, plan]);
@@ -79,7 +93,7 @@ export default function MyRoutine() {
   useEffect(() => {
     (async () => {
       const savedProgress = await AsyncStorage.getItem("routineProgress");
-      const parsed = savedProgress ? JSON.parse(savedProgress) : {};
+      const parsed = savedProgress ? JSON.parse(savedProgress) as Record<"Morning" | "Night", { name: string; done: boolean }[]> : ({} as Record<"Morning" | "Night", { name: string; done: boolean }[]>);
       parsed[routineType] = steps;
       await AsyncStorage.setItem("routineProgress", JSON.stringify(parsed));
     })();
@@ -90,8 +104,17 @@ export default function MyRoutine() {
     AsyncStorage.setItem("waterIntake", waterIntake.toString());
   }, [waterIntake]);
 
+  // ---------- CALCULATE AND SAVE ROUTINE SCORE ----------
+  const completedSteps = steps.filter(s => s.done).length;
+  const totalSteps = steps.length;
+  const routinePercentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+
+  useEffect(() => {
+    AsyncStorage.setItem("routineScore", routinePercentage.toString());
+  }, [routinePercentage]);
+
   // ---------- TOGGLE COMPLETION ----------
-  const toggleStep = (index) => {
+  const toggleStep = (index: number) => {
     setSteps((prev) =>
       prev.map((s, i) => (i === index ? { ...s, done: !s.done } : s))
     );
@@ -108,7 +131,7 @@ export default function MyRoutine() {
   };
 
   // ---------- DELETE STEP ----------
-  const deleteStep = (i) => {
+  const deleteStep = (i: number) => {
     setPlan((prev) => ({
       ...prev,
       [routineType]: prev[routineType].filter((_, idx) => idx !== i),
@@ -119,7 +142,7 @@ export default function MyRoutine() {
   const savePlan = async () => {
     await AsyncStorage.setItem("dailyPlan", JSON.stringify(plan));
     // Update steps immediately
-    setSteps(plan[routineType].map((s) => ({ name: s, done: false })));
+    setSteps(plan[routineType].map((s: string) => ({ name: s, done: false })));
     setIsEditing(false);
     Alert.alert("✅ Routine Updated", "Your skincare plan has been updated.");
   };
@@ -131,15 +154,50 @@ export default function MyRoutine() {
   const progress = waterIntake / waterGoal;
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>My Routine</Text>
-      <Text style={styles.subtitle}>
-        Track your skincare progress and hydration 🌿
-      </Text>
+    <View style={styles.container}>
+      <View style={styles.navbar}>
+        <TouchableOpacity onPress={() => router.push("/user/Profile")} style={styles.navIcon}>
+          <Ionicons name="person-circle-outline" size={28} color="black" />
+        </TouchableOpacity>
+
+        <Text style={styles.appTitle}>SKINZY</Text>
+
+        <View style={styles.navRight}>
+          <TouchableOpacity onPress={() => router.push("/user/Notifications")} style={styles.navIcon}>
+            <Ionicons name="notifications-outline" size={22} color="#FF6E56" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={toggleMenu} style={styles.navIcon}>
+            <Ionicons name="menu-outline" size={26} color="black" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {menuVisible && (
+        <View style={styles.dropdown}>
+          {menuLinks.map((item) => (
+            <TouchableOpacity
+              key={item.label}
+              style={styles.menuItem}
+              onPress={() => {
+                setMenuVisible(false);
+                router.push(item.path);
+              }}
+            >
+              <Text style={styles.menuText}>{item.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+        <Text style={styles.title}>My Routine</Text>
+        <Text style={styles.subtitle}>
+          Track your skincare progress and hydration 🌿
+        </Text>
 
       {/* Morning/Night Switch */}
       <View style={styles.tabRow}>
-        {["Morning", "Night"].map((type) => (
+        {(["Morning", "Night"] as const).map((type) => (
           <TouchableOpacity
             key={type}
             onPress={() => setRoutineType(type)}
@@ -234,12 +292,57 @@ export default function MyRoutine() {
           <Text style={styles.btnText}>+ Add Glass</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 20 },
+  container: { flex: 1, backgroundColor: "#fff" },
+  navbar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    paddingHorizontal: 10,
+    paddingVertical: 15,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+    marginBottom: 20,
+  },
+  navIcon: {
+    padding: 5,
+  },
+  appTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  navRight: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  dropdown: {
+    position: "absolute",
+    top: 100,
+    right: 20,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#000",
+    borderRadius: 8,
+    padding: 10,
+    zIndex: 10,
+    elevation: 5,
+  },
+  menuItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+  },
+  menuText: {
+    fontSize: 16,
+    color: "#000",
+  },
   title: {
     fontSize: 26,
     fontWeight: "bold",

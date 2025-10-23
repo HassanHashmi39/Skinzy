@@ -14,7 +14,7 @@ export default function BookingSuccess() {
       </Text>
       <TouchableOpacity
         style={styles.btn}
-        onPress={() => router.push("/MyBookings")}
+        onPress={() => router.push("/user/MyBookings")}
       >
         <Text style={styles.btnText}>View My Bookings</Text>
       </TouchableOpacity>

@@ -23,6 +23,7 @@ export default function Profile() {
     image: null,
   });
   const [historyCount, setHistoryCount] = useState(0);
+  const [averageScore, setAverageScore] = useState("85");
   const router = useRouter();
 
   useEffect(() => {
@@ -33,6 +34,9 @@ export default function Profile() {
 
         const history = await AsyncStorage.getItem("analysisHistory");
         if (history) setHistoryCount(JSON.parse(history).length);
+
+        const savedScore = await AsyncStorage.getItem("averageSkinScore");
+        if (savedScore) setAverageScore(savedScore);
       } catch (e) {
         console.log("Error loading profile", e);
       }
@@ -140,7 +144,7 @@ export default function Profile() {
           <Text style={styles.statLabel}>Consultations</Text>
         </View>
         <View style={styles.statBox}>
-          <Text style={styles.statValue}>85%</Text>
+          <Text style={styles.statValue}>{averageScore}%</Text>
           <Text style={styles.statLabel}>Avg. Skin Health</Text>
         </View>
       </View>

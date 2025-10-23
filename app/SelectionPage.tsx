@@ -1,11 +1,22 @@
 import { useRouter } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  ImageBackground,
+  StyleSheet, Text, TouchableOpacity,
+  View
+} from "react-native";
+const backgroundImage = require("./Images/Background.png");
+const logoImage = require("./Images/logo.png");
 
 export default function SelectionPage() {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
+        <ImageBackground source={backgroundImage} resizeMode="cover" style={{flex: 1,width: '100%', height: '100%'}}> 
+      <Image source={logoImage}
+        style={{ width: 150, height: 150, alignSelf: 'center', marginTop: 100, marginBottom: 20 }}
+      />
       <Text style={styles.title}>Select Your Role</Text>
 
       <TouchableOpacity
@@ -21,12 +32,14 @@ export default function SelectionPage() {
       >
         <Text style={styles.text}>Continue as Doctor</Text>
       </TouchableOpacity>
-    </View>
+    </ImageBackground>
+      </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center" },
+  container: { flex: 1, backgroundImage: "url(./Images/Background.png)", backgroundSize: "cover"
+   },
   title: { fontSize: 22, marginBottom: 30 },
   btn: {
     width: 220,

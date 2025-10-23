@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams } from "expo-router"; // 👈 to receive params
+import { useLocalSearchParams, useRouter } from "expo-router"; // 👈 to receive params
 import React, { useState } from "react";
 import {
   Alert,
@@ -13,11 +13,12 @@ import {
 } from "react-native";
 
 export default function PatientDetail() {
+  const router = useRouter();
   const { name, age, gender, skinType, allergies, history } = useLocalSearchParams();
 
   const [doctorNote, setDoctorNote] = useState("");
   const [diagnosis, setDiagnosis] = useState("");
-  const [notesList, setNotesList] = useState([]);
+  const [notesList, setNotesList] = useState<{ id: number; diagnosis: string; note: string; date: string }[]>([]);
 
   // Dummy previous data (could be fetched via API later)
   const patient = {
@@ -73,6 +74,24 @@ export default function PatientDetail() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Navbar */}
+      <View style={styles.navbar}>
+        <TouchableOpacity onPress={() => router.push("/Doctor/DoctorProfile")} style={styles.navIcon}>
+          <Ionicons name="person-circle-outline" size={28} color="#fff" />
+        </TouchableOpacity>
+
+        <Text style={styles.appTitle}>DOCTOR PANEL</Text>
+
+        <View style={styles.navRight}>
+          <TouchableOpacity onPress={() => router.push("/Doctor/DoctorNotifications")} style={styles.navIcon}>
+            <Ionicons name="notifications-outline" size={22} color="#FF6E56" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push("/Doctor/DoctorChat")} style={styles.navIcon}>
+            <Ionicons name="chatbubble-ellipses-outline" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
       {/* Header */}
       <View style={styles.header}>
         <Ionicons name="person-circle-outline" size={40} color="#000" />
@@ -159,7 +178,19 @@ export default function PatientDetail() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 20, paddingTop: 50 },
+  container: { flex: 1, backgroundColor: "#fff", padding: 20,paddingTop:0 },
+  navbar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#000",
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 14,
+  },
+  appTitle: { color: "#fff", fontWeight: "900", fontSize: 20, letterSpacing: 1 },
+  navRight: { flexDirection: "row", alignItems: "center" },
+  navIcon: { marginHorizontal: 8 },
   header: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 20 },
   name: { fontSize: 22, fontWeight: "bold", color: "#000" },
   sub: { color: "#555" },

@@ -113,7 +113,7 @@ export default function AnalysisResult() {
           style={styles.btn}
           onPress={() =>
             router.push({
-              pathname: "/Consult",
+              pathname: "/user/Consult",
               params: {
                 from: "analysis",
                 concern: issues.join(", "),

@@ -3,11 +3,11 @@ import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function PermissionsScreen() {
@@ -45,7 +45,7 @@ export default function PermissionsScreen() {
       Alert.alert("Permissions Required", "Please allow both permissions.");
       return;
     }
-    router.push("/Dashboard"); // next main screen
+    router.push("/user/Dashboard"); // next main screen
   };
 
   return (

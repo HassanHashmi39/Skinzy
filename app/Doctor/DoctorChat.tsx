@@ -1,18 +1,20 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    FlatList,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function DoctorChat() {
-  const [selectedPatient, setSelectedPatient] = useState(null);
+  const router = useRouter();
+  const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
 
   // Dummy patient list
   const patients = [
@@ -22,7 +24,7 @@ export default function DoctorChat() {
   ];
 
   // Sample messages
-  const [messages, setMessages] = useState({
+  const [messages, setMessages] = useState<Record<string, { id: string; sender: string; text: string; time: string }[]>>({
     "1": [
       { id: "m1", sender: "patient", text: "Hello Doctor!", time: "9:00 AM" },
       {
@@ -59,14 +61,14 @@ export default function DoctorChat() {
   };
 
   // Chat interface
-  const renderMessage = ({ item }) => (
+  const renderMessage = ({ item }: { item: { id: string; sender: string; text: string; time: string } }) => (
     <View
       style={[
         styles.messageBubble,
         item.sender === "doctor" ? styles.doctorMsg : styles.patientMsg,
       ]}
     >
-      <Text style={styles.messageText}>{item.text}</Text>
+      <Text style={[styles.messageText, { color: item.sender === "doctor" ? "#fff" : "#000" }]}>{item.text}</Text>
       <Text style={styles.messageTime}>{item.time}</Text>
     </View>
   );
@@ -145,13 +147,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     paddingHorizontal: 20,
-    paddingTop: 50,
   },
+  navbar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#000",
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 14,
+  },
+  appTitle: { color: "#fff", fontWeight: "900", fontSize: 20, letterSpacing: 1 },
+  navRight: { flexDirection: "row", alignItems: "center" },
+  navIcon: { marginHorizontal: 8 },
   title: {
     fontSize: 26,
     fontWeight: "bold",
     color: "#000",
     textAlign: "center",
+    marginTop: 20,
   },
   subtitle: {
     textAlign: "center",
@@ -210,7 +224,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#eee",
   },
   messageText: {
-    color: "#fff",
+    color: "#000",
   },
   messageTime: {
     color: "#ccc",

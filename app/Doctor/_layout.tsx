@@ -16,7 +16,6 @@ export default function Layout() {
         },
       }}
     >
-      {/* ✅ Visible Tabs */}
       <Tabs.Screen
         name="DoctorDashboard"
         options={{
@@ -47,17 +46,16 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
-      name ="DoctorChat"
-      options ={{
-        title: "Messages",
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="chatbubble-ellipses-outline" color={color} size={size} />
-        ),
-      }}
+        name="DoctorAppointments"
+        options={{
+          title: "Appointments",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="clipboard-outline" color={color} size={size} />
+          ),
+        }}
       />
 
 
-      {/* 🚫 Hidden Pages */}
       <Tabs.Screen name="DoctorInformationForm" options={{ href: null }} />
       <Tabs.Screen name="DoctorNotifications" options={{ href: null }} />
       <Tabs.Screen name="DoctorProfile" options={{ href: null }} />
@@ -67,7 +65,7 @@ export default function Layout() {
       <Tabs.Screen name="DoctorSignup" options={{ href: null }} />
       <Tabs.Screen name="DoctorNotes" options={{ href: null }} />
       <Tabs.Screen name="DoctorPrescription" options={{ href: null }} />
-      <Tabs.Screen name="DoctorAppointments" options={{ href: null }} />
+      <Tabs.Screen name="DoctorChat" options={{ href: null }} />
       <Tabs.Screen name="PatientDetail" options={{ href: null }} />
       <Tabs.Screen name="index" options={{ href: null }} />
     </Tabs>

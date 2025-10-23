@@ -1,4 +1,5 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   FlatList,
@@ -12,6 +13,19 @@ import {
 } from "react-native";
 
 export default function Products() {
+  const [menuVisible, setMenuVisible] = useState(false);
+  const router = useRouter();
+
+  const toggleMenu = () => setMenuVisible(!menuVisible);
+
+  const menuLinks: { label: string; path: "/user/MyRoutine" | "/user/Products" | "/user/Consult" | "/user/Profile" | "/user/MyBookings" }[] = [
+    { label: "🧴 My Routine", path: "/user/MyRoutine" },
+    { label: "🛍️ Products", path: "/user/Products" },
+    { label: "👨‍⚕️ Doctors", path: "/user/Consult" },
+    { label: "📄 Profile", path: "/user/Profile" },
+    { label: "🗓 Bookings", path: "/user/MyBookings" }
+  ];
+
   const categories = [
     { name: "Cleanser", icon: "water-outline" },
     { name: "Serum", icon: "flask-outline" },
@@ -145,45 +159,79 @@ export default function Products() {
     ],
   };
 
-  const [selectedCategory, setSelectedCategory] = useState("Cleanser");
+  const [selectedCategory, setSelectedCategory] = useState<keyof typeof productsData>("Cleanser");
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Skincare Products</Text>
-      <Text style={styles.subtitle}>Choose a category to explore products</Text>
+      <View style={styles.navbar}>
+        <TouchableOpacity onPress={() => router.push("/user/Profile")} style={styles.navIcon}>
+          <Ionicons name="person-circle-outline" size={28} color="black" />
+        </TouchableOpacity>
 
-      <FlatList
-        data={categories}
-        horizontal
-        keyExtractor={(item) => item.name}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.categoryList}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[
-              styles.categoryButton,
-              selectedCategory === item.name && styles.activeCategory,
-            ]}
-            onPress={() => setSelectedCategory(item.name)}
-          >
-            <Ionicons
-              name={item.icon}
-              size={22}
-              color={selectedCategory === item.name ? "#fff" : "#000"}
-            />
-            <Text
-              style={[
-                styles.categoryText,
-                selectedCategory === item.name && styles.activeCategoryText,
-              ]}
-            >
-              {item.name}
-            </Text>
+        <Text style={styles.appTitle}>SKINZY</Text>
+
+        <View style={styles.navRight}>
+          <TouchableOpacity onPress={() => router.push("/user/Notifications")} style={styles.navIcon}>
+            <Ionicons name="notifications-outline" size={22} color="#FF6E56" />
           </TouchableOpacity>
-        )}
-      />
+          <TouchableOpacity onPress={toggleMenu} style={styles.navIcon}>
+            <Ionicons name="menu-outline" size={26} color="black" />
+          </TouchableOpacity>
+        </View>
+      </View>
 
-      <ScrollView style={{ marginTop: 25 }}>
+      {menuVisible && (
+        <View style={styles.dropdown}>
+          {menuLinks.map((item) => (
+            <TouchableOpacity
+              key={item.label}
+              style={styles.menuItem}
+              onPress={() => {
+                setMenuVisible(false);
+                router.push(item.path);
+              }}
+            >
+              <Text style={styles.menuText}>{item.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+        <Text style={styles.title}>Skincare Products</Text>
+        <Text style={styles.subtitle}>Choose a category to explore products</Text>
+
+        <FlatList
+          data={categories}
+          horizontal
+          keyExtractor={(item) => item.name}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoryList}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[
+                styles.categoryButton,
+                selectedCategory === item.name && styles.activeCategory,
+              ]}
+              onPress={() => setSelectedCategory(item.name as keyof typeof productsData)}
+            >
+              <Ionicons
+                name={item.icon as any}
+                size={22}
+                color={selectedCategory === item.name ? "#fff" : "#000"}
+              />
+              <Text
+                style={[
+                  styles.categoryText,
+                  selectedCategory === item.name && styles.activeCategoryText,
+                ]}
+              >
+                {item.name}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+
         {productsData[selectedCategory].map((product) => (
           <View key={product.id} style={styles.productCard}>
             <Image
@@ -221,7 +269,51 @@ export default function Products() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", paddingTop: 50, paddingHorizontal: 20 },
+  container: { flex: 1, backgroundColor: "#fff",  paddingHorizontal: 20 },
+  navbar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    paddingHorizontal: 5,
+    paddingVertical: 15,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+    marginBottom: 20,
+  },
+  navIcon: {
+    padding: 5,
+  },
+  appTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  navRight: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  dropdown: {
+    position: "absolute",
+    top: 100,
+    right: 20,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#000",
+    borderRadius: 8,
+    padding: 10,
+    zIndex: 10,
+    elevation: 5,
+  },
+  menuItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+  },
+  menuText: {
+    fontSize: 16,
+    color: "#000",
+  },
   title: { fontSize: 28, fontWeight: "bold", color: "#000", textAlign: "center" },
   subtitle: { color: "#555", fontSize: 14, textAlign: "center", marginBottom: 20 },
   categoryList: { paddingVertical: 8 },

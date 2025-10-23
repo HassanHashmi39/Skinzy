@@ -30,7 +30,7 @@ export default function UserInfoScreen() {
       return;
     }
     Alert.alert("Profile Saved ✅", "Your personal info has been recorded.");
-    router.push("/HealthInfoScreen");
+    router.push("/user/HealthInfoScreen");
   };
 
   return (
