@@ -63,25 +63,26 @@ function ProductRecommendations({ result, onNavigate, isGuest, initialSearch }: 
         if (response.ok && data.products) {
           const mappedProducts = data.products.map((p: any) => {
             let cat = 'Recommended';
-            if (p.name.toLowerCase().includes('serum') || p.name.toLowerCase().includes('niacinamide')) cat = 'Serum';
-            else if (p.name.toLowerCase().includes('cleanser') || p.name.toLowerCase().includes('wash')) cat = 'Cleanser';
-            else if (p.name.toLowerCase().includes('moisturizer') || p.name.toLowerCase().includes('cream')) cat = 'Moisturizer';
-            else if (p.name.toLowerCase().includes('spf') || p.name.toLowerCase().includes('block')) cat = 'Sunscreen';
+            const pName = p.name || '';
+            if (pName.toLowerCase().includes('serum') || pName.toLowerCase().includes('niacinamide')) cat = 'Serum';
+            else if (pName.toLowerCase().includes('cleanser') || pName.toLowerCase().includes('wash')) cat = 'Cleanser';
+            else if (pName.toLowerCase().includes('moisturizer') || pName.toLowerCase().includes('cream')) cat = 'Moisturizer';
+            else if (pName.toLowerCase().includes('spf') || pName.toLowerCase().includes('block')) cat = 'Sunscreen';
 
             return {
               id: p._id,
               name: p.name,
-              brand: p.name.includes('Jenpharm') || p.name.includes('Vince') || p.name.includes('Derma') ? 'Pakistani Brand' : 'Skinzy Verified',
-              price: `PKR ${p.price || 0}`,
+              brand: p.brand || (pName.includes('Jenpharm') || pName.includes('Vince') || pName.includes('Derma') ? 'Pakistani Brand' : 'Skinzy Verified'),
+              price: p.price && typeof p.price === 'string' && p.price.includes('Rs') ? p.price : `PKR ${p.price || 0}`,
               rating: 4.8,
               reviews: 156,
               isHalal: true,
               isOrganic: true,
-              category: cat,
+              category: p.category || cat,
               buyLinks: { daraz: 'https://daraz.pk' },
-              benefits: p.description.split(',').map((b: string) => b.trim()),
+              benefits: p.description ? p.description.split(',').map((b: string) => b.trim()) : [p.condition || 'Skin Care'],
               image: p.imageUrl || 'local product',
-              targetDiseases: p.targetDiseases || [],
+              targetDiseases: p.targetDiseases || [p.condition].filter(Boolean),
             };
           });
           setDbProducts(mappedProducts);
