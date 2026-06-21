@@ -91,6 +91,7 @@ export function PatientChatScreen({ onBack, initialDoctorId }: { onBack: () => v
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const { width } = useWindowDimensions();
   const isDesktop = width >= 768;
+  const router = useRouter();
 
   useEffect(() => {
     fetchCurrentUser();
@@ -261,13 +262,18 @@ export function PatientChatScreen({ onBack, initialDoctorId }: { onBack: () => v
               <ArrowLeft size={20} color="#374151" />
             </TouchableOpacity>
           )}
-          <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: getAvatarColor(selectedChatUser.name), alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ color: '#fff', fontWeight: 'bold' }}>{getInitials(selectedChatUser.name)}</Text>
-          </View>
-          <View>
-            <Text style={{ fontWeight: 'bold', color: '#111827' }}>{selectedChatUser.name}</Text>
-            <Text style={{ fontSize: 12, color: '#7c3aed' }}>{selectedChatUser.specialization || 'Doctor'}</Text>
-          </View>
+          <TouchableOpacity 
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}
+            onPress={() => router.push(`/patient/doctor/${selectedChatUser._id}`)}
+          >
+            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: getAvatarColor(selectedChatUser.name), alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={{ color: '#fff', fontWeight: 'bold' }}>{getInitials(selectedChatUser.name)}</Text>
+            </View>
+            <View>
+              <Text style={{ fontWeight: 'bold', color: '#111827' }}>{selectedChatUser.name}</Text>
+              <Text style={{ fontSize: 12, color: '#7c3aed' }}>{selectedChatUser.specialization || 'Doctor'}</Text>
+            </View>
+          </TouchableOpacity>
         </View>
 
         <ScrollView ref={scrollViewRef} style={{ flex: 1, padding: 16, backgroundColor: '#f3f4f6' }}
@@ -527,10 +533,13 @@ export default function ChatPage() {
         const userRes = await api.getCurrentUser();
         const role = userRes?.user?.role || userRes?.user?.userType || userRes?.role || userRes?.userType;
         if (role !== 'patient') {
-          router.replace('/shared/login');
+          console.error('[ChatPage] Role mismatch. Found role:', role, 'userRes:', userRes);
+          // router.replace('/shared/login');
         }
-      } catch (err) {
-        router.replace('/shared/login');
+      } catch (err: any) {
+        console.error('[ChatPage] Error in verifyRole:', err);
+        Alert.alert('Verify Role Error', String(err.message || err));
+        // router.replace('/shared/login');
       }
     };
     verifyRole();

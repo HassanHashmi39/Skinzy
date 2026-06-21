@@ -22,12 +22,12 @@ const userSchema = new mongoose.Schema(
         },
         userType: {
             type: String,
-            enum: ['patient', 'doctor'],
+            enum: ['patient', 'doctor', 'admin'],
             required: true,
         },
         role: {
             type: String,
-            enum: ['patient', 'doctor'],
+            enum: ['patient', 'doctor', 'admin'],
         },
         // Common fields
         phone: { type: String },
@@ -55,8 +55,14 @@ const userSchema = new mongoose.Schema(
         reviews: { type: Number, default: 0 },
         verificationStatus: {
             type: String,
-            enum: ['pending', 'verified', 'rejected'],
+            enum: ['pending', 'verified', 'rejected', 'blocked'],
             default: 'pending',
+        },
+        verificationDocuments: {
+            license: { type: String }, // Base64
+            cnicFront: { type: String }, // Base64
+            cnicBack: { type: String }, // Base64
+            certificate: { type: String }, // Base64
         },
         
         // Patient-specific fields

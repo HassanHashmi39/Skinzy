@@ -62,11 +62,14 @@ export default function Header() {
     pathname.includes('/shared/signup-information');
 
   // Member awareness
+  const isAdmin = pathname.includes('/admin');
   const isDoctor = pathname.includes('/doctor');
   const isPatient = pathname.includes('/patient');
 
   // SHOW MEMBER NAV if logged in and not on a dedicated auth/onboarding page
   const showMemberNav = isLoggedIn && !isAuthPage;
+
+  const homeRoute = isLoggedIn ? (isAdmin ? '/admin/dashboard' : isDoctor ? '/doctor/dashboard' : '/patient/dashboard') : '/';
 
   const NavItem = ({ title, route, icon: Icon, primary = false, action, badgeCount }: any) => {
     const isActive = pathname === route;
@@ -127,15 +130,7 @@ export default function Header() {
           className="flex-row items-center gap-2"
           onPress={() => {
             setMobileMenuOpen(false);
-            if (isLoggedIn) {
-              if (isDoctor) {
-                router.push('/doctor/dashboard');
-              } else {
-                router.push('/patient/dashboard');
-              }
-            } else {
-              router.push('/');
-            }
+            router.push(homeRoute);
           }}
         >
           <View className="w-10 h-10 bg-purple-600 rounded-xl items-center justify-center">
@@ -147,9 +142,11 @@ export default function Header() {
         {/* Desktop Nav */}
         {isDesktop ? (
           <View className="flex-row items-center gap-2">
-            <NavItem title="Home" route={isLoggedIn ? (isDoctor ? '/doctor/dashboard' : '/patient/dashboard') : '/'} icon={Home} />
+            <NavItem title="Home" route={homeRoute} icon={Home} />
             {showMemberNav ? (
-              isDoctor ? (
+              isAdmin ? (
+                <NavItem title="Logout" icon={LogOut} action={handleLogout} />
+              ) : isDoctor ? (
                 <>
                   <NavItem title="Chat" route="/doctor/chat" icon={MessageSquare} badgeCount={unreadMessages} />
                   <NavItem title="Logout" icon={LogOut} action={handleLogout} />
@@ -183,9 +180,11 @@ export default function Header() {
       {mobileMenuOpen && !isDesktop && (
         <View className="absolute top-[72px] left-0 w-full bg-white border-b border-gray-100 p-4 shadow-lg z-50">
           <View className="gap-2">
-            <NavItem title="Home" route={isLoggedIn ? (isDoctor ? '/doctor/dashboard' : '/patient/dashboard') : '/'} icon={Home} />
+            <NavItem title="Home" route={homeRoute} icon={Home} />
             {showMemberNav ? (
-              isDoctor ? (
+              isAdmin ? (
+                <NavItem title="Logout" icon={LogOut} action={handleLogout} />
+              ) : isDoctor ? (
                 <>
                   <NavItem title="Chat" route="/doctor/chat" icon={MessageSquare} badgeCount={unreadMessages} />
                   <NavItem title="Logout" icon={LogOut} action={handleLogout} />

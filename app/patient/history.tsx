@@ -67,6 +67,78 @@ function FeedbackForm({ doctorName, appointmentDate, onSubmit, onClose }: Feedba
   );
 }
 
+type ReportFormProps = {
+  doctorName: string;
+  appointmentDate: string;
+  onSubmit: (reason: string, description: string) => void;
+  onClose: () => void;
+};
+
+function ReportForm({ doctorName, appointmentDate, onSubmit, onClose }: ReportFormProps) {
+  const [reason, setReason] = useState('Unprofessional Behavior');
+  const [description, setDescription] = useState('');
+  
+  const reasons = ['Unprofessional Behavior', 'No Show', 'Inappropriate Prescriptions', 'Harassment', 'Other'];
+
+  const handleSubmit = () => {
+    if (description.trim()) {
+      onSubmit(reason, description);
+    }
+  };
+
+  return (
+    <Modal transparent animationType="fade" visible={true} onRequestClose={onClose}>
+      <View className="flex-1 bg-black/50 items-center justify-center p-4">
+        <View className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-xl border border-red-200">
+          <View className="flex-row items-center justify-between mb-6">
+            <Text className="text-xl font-bold text-red-600">Report Doctor</Text>
+            <TouchableOpacity onPress={onClose} className="p-2 bg-gray-100 rounded-full">
+              <X size={20} color="#4b5563" />
+            </TouchableOpacity>
+          </View>
+          <View className="bg-red-50 rounded-2xl p-4 mb-6 border border-red-100">
+            <Text className="text-gray-900 mb-1 font-bold">{doctorName}</Text>
+            <Text className="text-gray-600 text-sm">Appointment: {appointmentDate}</Text>
+          </View>
+          
+          <Text className="text-sm font-bold text-gray-700 mb-2">Reason</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
+             <View className="flex-row gap-2">
+                {reasons.map(r => (
+                  <TouchableOpacity 
+                    key={r} 
+                    onPress={() => setReason(r)}
+                    className={`px-3 py-2 rounded-lg border ${reason === r ? 'bg-red-500 border-red-500' : 'bg-white border-gray-200'}`}
+                  >
+                    <Text className={reason === r ? 'text-white font-bold' : 'text-gray-700'}>{r}</Text>
+                  </TouchableOpacity>
+                ))}
+             </View>
+          </ScrollView>
+
+          <Text className="text-sm font-bold text-gray-700 mb-2">Details</Text>
+          <TextInput
+            value={description}
+            onChangeText={setDescription}
+            placeholder="Please provide specifics about the incident..."
+            multiline
+            numberOfLines={4}
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl min-h-[100px] bg-gray-50 mb-6"
+          />
+          <View className="flex-row gap-3">
+            <TouchableOpacity onPress={onClose} className="flex-1 px-6 py-3 border-2 border-gray-300 rounded-full items-center">
+              <Text className="text-gray-700 font-bold">Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleSubmit} disabled={!description.trim()} className={`flex-1 px-6 py-3 rounded-full items-center ${description.trim() ? 'bg-red-600' : 'bg-red-300'}`}>
+              <Text className="text-white font-bold">Submit Report</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 type HistoryEntry = {
   _id: string;
   date: string;
@@ -76,6 +148,7 @@ type HistoryEntry = {
   description: string;
   status: string;
   doctorName?: string;
+  doctorId?: string;
   feedbackGiven?: boolean;
   appointmentId?: string;
   prescriptionText?: string;
@@ -88,6 +161,7 @@ export default function HistoryPage() {
   const [filterType, setFilterType] = useState<'all' | 'analysis' | 'appointment' | 'prescription'>((params.filter as any) || 'all');
   const [historyData, setHistoryData] = useState<HistoryEntry[]>([]);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [showReportForm, setShowReportForm] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<HistoryEntry | null>(null);
   const [expandedPrescriptions, setExpandedPrescriptions] = useState<Record<string, boolean>>({});
 
@@ -127,7 +201,7 @@ export default function HistoryPage() {
           time: new Date(a.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           type: 'analysis',
           title: 'Skin Analysis',
-          description: `Analysis revealed: ${Object.entries(a.results || {}).map(([k, v]) => `${k} (${v}%)`).join(', ')}`,
+          description: `Analysis revealed: ${a.results?.detectedDisease || a.results?.skinType || 'Unknown Condition'} - ${a.results?.advice || 'Please review your action plan.'}`,
           status: 'Completed'
         });
       });
@@ -143,6 +217,7 @@ export default function HistoryPage() {
           description: apt.reason || 'General checkup',
           status: apt.status.charAt(0).toUpperCase() + apt.status.slice(1),
           doctorName: apt.doctor.name,
+          doctorId: apt.doctor._id,
           feedbackGiven: false // TODO: check if feedback exists
         });
 
@@ -165,6 +240,16 @@ export default function HistoryPage() {
       // Sort by date desc
       history.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       setHistoryData(history);
+      
+      // Auto-open feedback form if navigated from notification
+      if (params.openFeedback) {
+        const entry = history.find(e => e._id === params.openFeedback && e.type === 'appointment');
+        if (entry) {
+          setSelectedEntry(entry);
+          setShowFeedbackForm(true);
+        }
+      }
+
       setLoading(false);
     } catch (err) {
       console.error('Error fetching history:', err);
@@ -175,7 +260,9 @@ export default function HistoryPage() {
   const handleFeedbackSubmit = async (rating: number, comment: string) => {
     if (selectedEntry) {
       try {
-          // api implementation needed if we want to save ratings
+          // Send feedback to the backend
+          await api.submitRating(selectedEntry._id, rating, comment);
+          
           if (Platform.OS === 'web') {
               window.alert(`Feedback Submitted\n\nThank you for your ${rating}-star feedback!`);
           } else {
@@ -193,6 +280,46 @@ export default function HistoryPage() {
     }
   };
 
+  const handleReportSubmit = async (reason: string, description: string) => {
+    if (selectedEntry && selectedEntry.doctorId) {
+      try {
+          const token = await api.getAuthToken();
+          const response = await fetch(`${api.API_BASE_URL}/feedbacks/report`, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              doctorId: selectedEntry.doctorId,
+              reason,
+              description
+            })
+          });
+          
+          if (response.ok) {
+            if (Platform.OS === 'web') {
+                window.alert('Report Submitted\n\nYour report has been securely sent to our administrative team for review.');
+            } else {
+                Alert.alert('Report Submitted', 'Your report has been securely sent to our administrative team for review.');
+            }
+          } else {
+            const data = await response.json();
+            throw new Error(data.message || 'Failed to submit report');
+          }
+      } catch (e: any) {
+          if (Platform.OS === 'web') {
+              window.alert(`Error: ${e.message}`);
+          } else {
+              Alert.alert('Error', e.message);
+          }
+      } finally {
+        setShowReportForm(false);
+        setSelectedEntry(null);
+      }
+    }
+  };
+
   const filteredHistory = filterType === 'all' ? historyData : historyData.filter(e => e.type === filterType);
 
   if (loading) {
@@ -204,7 +331,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }} className="bg-gray-50">
       <View className="p-4 md:p-8 max-w-4xl mx-auto w-full">
         <TouchableOpacity 
             onPress={() => router.push('/patient/dashboard')}
@@ -282,10 +409,17 @@ export default function HistoryPage() {
                                 </Text>
                             </TouchableOpacity>
                         )}
-                        {entry.type === 'appointment' && entry.status === 'Completed' && (
-                            <TouchableOpacity onPress={() => { setSelectedEntry(entry); setShowFeedbackForm(true); }}>
-                                <Text className="text-purple-600 font-bold text-xs">Rate Doctor</Text>
-                            </TouchableOpacity>
+                        {entry.type === 'appointment' && (
+                            <View className="flex-row items-center gap-4">
+                                {entry.status === 'Completed' && (
+                                  <TouchableOpacity onPress={() => { setSelectedEntry(entry); setShowFeedbackForm(true); }}>
+                                      <Text className="text-purple-600 font-bold text-xs">Rate Doctor</Text>
+                                  </TouchableOpacity>
+                                )}
+                                <TouchableOpacity onPress={() => { setSelectedEntry(entry); setShowReportForm(true); }}>
+                                    <Text className="text-red-600 font-bold text-xs">Report</Text>
+                                </TouchableOpacity>
+                            </View>
                         )}
                         {entry.type === 'analysis' && (
                             <TouchableOpacity 
@@ -318,6 +452,15 @@ export default function HistoryPage() {
             appointmentDate={`${new Date(selectedEntry.date).toLocaleDateString()} at ${selectedEntry.time}`}
             onSubmit={handleFeedbackSubmit}
             onClose={() => { setShowFeedbackForm(false); setSelectedEntry(null); }}
+          />
+        )}
+        
+        {showReportForm && selectedEntry && (
+          <ReportForm
+            doctorName={selectedEntry.doctorName || 'Doctor'}
+            appointmentDate={`${new Date(selectedEntry.date).toLocaleDateString()} at ${selectedEntry.time}`}
+            onSubmit={handleReportSubmit}
+            onClose={() => { setShowReportForm(false); setSelectedEntry(null); }}
           />
         )}
         <View className="h-10" />

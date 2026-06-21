@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import {
-  KeyboardAvoidingView, Platform, SafeAreaView, ScrollView,
+  KeyboardAvoidingView, Platform, ScrollView,
   Text, TextInput, TouchableOpacity, View, ActivityIndicator, Image, useWindowDimensions,
 } from 'react-native';
 import { ArrowLeft, FileText, Image as ImageIcon, MoreVertical, Paperclip, Search, Send, Trash2 } from 'lucide-react-native';
@@ -495,8 +495,8 @@ export function DoctorChat({ onBack }: DoctorChatProps) {
 export default function DoctorChatPage() {
   const router = useRouter();
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+    <View style={{ flex: 1, backgroundColor: '#fff' }}>
       <DoctorChat onBack={() => router.back()} />
-    </SafeAreaView>
+    </View>
   );
 }

@@ -46,4 +46,12 @@ const doctorOnly = (req, res, next) => {
     next();
 };
 
-module.exports = { protect, patientOnly, doctorOnly };
+const adminOnly = (req, res, next) => {
+    const role = req.user.role || req.user.userType;
+    if (role !== 'admin') {
+        return res.status(403).json({ message: 'Access denied: Admin role required' });
+    }
+    next();
+};
+
+module.exports = { protect, patientOnly, doctorOnly, adminOnly };

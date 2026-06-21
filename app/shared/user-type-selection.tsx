@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Stethoscope, UserCircle } from 'lucide-react-native';
-import { SafeAreaView, ScrollView, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 
 type UserTypeSelectionProps = {
   onNavigate: (page: string) => void;
@@ -17,7 +17,7 @@ function UserTypeSelection({ onNavigate, onSelectUserType }: UserTypeSelectionPr
         className="bg-purple-50"
         showsVerticalScrollIndicator={false}
     >
-      <SafeAreaView className="flex-1">
+      <View className="flex-1">
         {/* Main Container - Removed justify-center to prevent layout issues on web/overflow */}
         <View className="flex-1 px-4 py-12 items-center">
           <View className="w-full max-w-5xl">
@@ -124,7 +124,7 @@ function UserTypeSelection({ onNavigate, onSelectUserType }: UserTypeSelectionPr
             </View>
           </View>
         </View>
-      </SafeAreaView>
+      </View>
     </ScrollView>
   );
 }

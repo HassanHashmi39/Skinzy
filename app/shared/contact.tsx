@@ -5,7 +5,6 @@ import {
     ActivityIndicator,
     KeyboardAvoidingView,
     Platform,
-    SafeAreaView,
     ScrollView,
     Text,
     TextInput,
@@ -58,7 +57,7 @@ export default function ContactUsPage() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
+        <View style={{ flex: 1, backgroundColor: '#fff' }}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 className="flex-1"
@@ -96,7 +95,7 @@ export default function ContactUsPage() {
                         </TouchableOpacity>
                     </View>
                 ) : (
-                    <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false} className="px-6 py-6">
+                    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false} className="px-6 py-6">
                         {/* Header Banner */}
                         <View className="items-center mb-8">
                             <View className="w-16 h-16 bg-purple-50 rounded-3xl items-center justify-center mb-4 border border-purple-100">
@@ -203,6 +202,6 @@ export default function ContactUsPage() {
                     </ScrollView>
                 )}
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </View>
     );
 }

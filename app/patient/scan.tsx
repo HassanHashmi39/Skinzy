@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
-import { Camera, ChevronLeft, Image as ImageIcon, Info, Sparkles, X } from 'lucide-react-native';
+import { router } from 'expo-router';
+import { Camera, ChevronLeft, Image as ImageIcon, Info, Sparkles, X, FlipHorizontal } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Dimensions, Image, Modal, Platform, SafeAreaView, ScrollView, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import Footer from '../../components/Footer';
@@ -10,7 +10,6 @@ import * as api from '../../utils/api';
 const { width } = Dimensions.get('window');
 
 export default function SkinAnalysisPage() {
-    const router = useRouter();
     const { width: winWidth, height } = useWindowDimensions();
     const isLargeScreen = winWidth > 768;
 
@@ -88,9 +87,9 @@ export default function SkinAnalysisPage() {
         setImage(null);
     };
 
-    // Camera State for Web
     const [isCameraActive, setIsCameraActive] = useState(false);
     const [cameraError, setCameraError] = useState<string | null>(null);
+    const [isMirrored, setIsMirrored] = useState(false);
     const videoRef = useRef<any>(null);
     const streamRef = useRef<MediaStream | null>(null);
 
@@ -200,6 +199,11 @@ const takePhoto = async () => {
 const startWebCamera = async () => {
     setCameraError(null);
     try {
+        // Stop existing stream if we are flipping
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+        }
+
         const constraints = {
             video: {
                 facingMode: "user",
@@ -233,6 +237,10 @@ const stopWebCamera = () => {
     setIsCameraActive(false);
 };
 
+const toggleMirror = () => {
+    setIsMirrored(prev => !prev);
+};
+
 const captureWebPhoto = () => {
     if (!videoRef.current || !streamRef.current) {
         console.error("Camera not ready for capture");
@@ -256,7 +264,14 @@ const captureWebPhoto = () => {
     canvas.height = size;
     const ctx = canvas.getContext('2d');
     if (ctx) {
+        if (isMirrored) {
+            ctx.translate(size, 0);
+            ctx.scale(-1, 1);
+        }
         ctx.drawImage(video, startX, startY, size, size, 0, 0, size, size);
+        if (isMirrored) {
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
         const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
         setImage(dataUrl);
         stopWebCamera();
@@ -796,7 +811,7 @@ return (
                                         ref={videoRef}
                                         autoPlay
                                         playsInline
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover', transform: isMirrored ? 'scaleX(-1)' : 'none' }}
                                     />
                                 )}
 
@@ -811,6 +826,12 @@ return (
                                 </View>
 
                                 <View className="absolute bottom-4 left-0 right-0 flex-row justify-center gap-4">
+                                    <TouchableOpacity
+                                        onPress={toggleMirror}
+                                        className="bg-gray-800 p-4 rounded-full shadow-2xl transform active:scale-95 transition-all"
+                                    >
+                                        <FlipHorizontal size={28} color="white" />
+                                    </TouchableOpacity>
                                     <TouchableOpacity
                                         onPress={captureWebPhoto}
                                         className="bg-purple-600 p-4 rounded-full shadow-2xl transform active:scale-95 transition-all"

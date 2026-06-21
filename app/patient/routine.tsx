@@ -5,9 +5,11 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, Platform, SafeAreaView, ScrollView, Switch, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Keyboard } from 'react-native';
 import * as api from '../../utils/api';
 
+import Constants from 'expo-constants';
+
 // Safely import Notifications
 let Notifications: any = null;
-if (Platform.OS !== 'web') {
+if (Platform.OS !== 'web' && Constants.appOwnership !== 'expo') {
     try {
         Notifications = require('expo-notifications');
         Notifications.setNotificationHandler({

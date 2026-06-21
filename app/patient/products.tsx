@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, ExternalLink, Leaf, Shield, ShoppingCart, Star } from 'lucide-react-native';
 import React, { useState, useEffect } from 'react';
-import { Image, Linking, SafeAreaView, ScrollView, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { Image, Linking, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import * as api from '../../utils/api';
 import { SkinAnalysisResult } from '../../utils/types';
 
@@ -22,6 +22,7 @@ type ProductRecommendationsProps = {
   result: SkinAnalysisResult | null;
   onNavigate: (page: string) => void;
   isGuest: boolean;
+  initialSearch?: string;
 };
 
 type Product = {
@@ -42,13 +43,57 @@ type Product = {
   };
   benefits: string[];
   image: string;
+  targetDiseases?: string[];
 };
 
-function ProductRecommendations({ result, onNavigate, isGuest }: ProductRecommendationsProps) {
+function ProductRecommendations({ result, onNavigate, isGuest, initialSearch }: ProductRecommendationsProps) {
   const { width } = useWindowDimensions();
   const isDesktop = width >= 1024;
 
   const skinType = result?.skinType || 'Normal';
+
+  const [dbProducts, setDbProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch(`${api.API_BASE_URL}/inventory/products`);
+        const data = await response.json();
+        if (response.ok && data.products) {
+          const mappedProducts = data.products.map((p: any) => {
+            let cat = 'Recommended';
+            if (p.name.toLowerCase().includes('serum') || p.name.toLowerCase().includes('niacinamide')) cat = 'Serum';
+            else if (p.name.toLowerCase().includes('cleanser') || p.name.toLowerCase().includes('wash')) cat = 'Cleanser';
+            else if (p.name.toLowerCase().includes('moisturizer') || p.name.toLowerCase().includes('cream')) cat = 'Moisturizer';
+            else if (p.name.toLowerCase().includes('spf') || p.name.toLowerCase().includes('block')) cat = 'Sunscreen';
+
+            return {
+              id: p._id,
+              name: p.name,
+              brand: p.name.includes('Jenpharm') || p.name.includes('Vince') || p.name.includes('Derma') ? 'Pakistani Brand' : 'Skinzy Verified',
+              price: `PKR ${p.price || 0}`,
+              rating: 4.8,
+              reviews: 156,
+              isHalal: true,
+              isOrganic: true,
+              category: cat,
+              buyLinks: { daraz: 'https://daraz.pk' },
+              benefits: p.description.split(',').map((b: string) => b.trim()),
+              image: p.imageUrl || 'local product',
+              targetDiseases: p.targetDiseases || [],
+            };
+          });
+          setDbProducts(mappedProducts);
+        }
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const [activeFilters, setActiveFilters] = useState<{
     halalOnly: boolean;
@@ -102,140 +147,32 @@ function ProductRecommendations({ result, onNavigate, isGuest }: ProductRecommen
     }))
     : [];
 
-  const products: Product[] = [...pakistaniProducts,
-  {
-    id: '1',
-    name: 'MandelAC Serum (Mandelic Acid)',
-    brand: 'Jenpharm Pakistani',
-    price: 'PKR 1,598',
-    rating: 4.8,
-    reviews: 2432,
-    isHalal: true,
-    isOrganic: false,
-    category: 'Serum',
-    buyLinks: { daraz: 'https://daraz.pk' },
-    benefits: ['Targets acne', 'Gentle exfoliation', 'Dermatologist recommended'],
-    image: 'mandelac',
-  },
-  {
-    id: '2',
-    name: 'Spectra Block SPF 60',
-    brand: 'Jenpharm Pakistani',
-    price: 'PKR 1000',
-    rating: 4.9,
-    reviews: 4120,
-    isHalal: true,
-    isOrganic: false,
-    category: 'Sunscreen',
-    buyLinks: { daraz: 'https://daraz.pk' },
-    benefits: ['High SPF protection', 'Non-greasy', 'Safe for sensitive skin'],
-    image: 'spectrablock',
-  },
-  {
-    id: '3',
-    name: 'Vitamin C Brightening Wash',
-    brand: 'Vince Pakistani',
-    price: 'PKR 899',
-    rating: 4.5,
-    reviews: 1840,
-    isHalal: true,
-    isOrganic: true,
-    category: 'Cleanser',
-    buyLinks: { daraz: 'https://daraz.pk' },
-    benefits: ['Deep cleansing', 'Skin brightening', 'Budget friendly'],
-    image: 'vince_vitc',
-  },
-  {
-    id: '4',
-    name: 'Youth Serum (Retinol)',
-    brand: 'Organic Traveller PK',
-    price: 'PKR 2,150',
-    rating: 4.7,
-    reviews: 950,
-    isHalal: true,
-    isOrganic: true,
-    category: 'Serum',
-    buyLinks: { daraz: 'https://daraz.pk' },
-    benefits: ['Anti-aging', 'Cell renewal', 'Vibrant skin'],
-    image: 'youth_serum',
-  },
-  {
-    id: '5',
-    name: 'Dermive Oil Free Moisturizer',
-    brand: 'Jenpharm Pakistani',
-    price: 'PKR 1,098',
-    rating: 4.8,
-    reviews: 3200,
-    isHalal: true,
-    isOrganic: false,
-    category: 'Moisturizer',
-    buyLinks: { daraz: 'https://daraz.pk' },
-    benefits: ['Non-comedogenic', 'Hydrating', 'Matte finish'],
-    image: 'dermive',
-  },
-  {
-    id: '6',
-    name: 'Gentle Foaming Cleanser',
-    brand: 'The Ordinary',
-    price: 'PKR 2,500',
-    rating: 4.5,
-    reviews: 1243,
-    isHalal: true,
-    isOrganic: true,
-    category: 'Cleanser',
-    buyLinks: { daraz: 'https://daraz.pk' },
-    benefits: ['Removes excess oil', 'Gentle on sensitive skin', 'pH balanced'],
-    image: 'ordinary_cleanser',
-  },
-  {
-    id: '7',
-    name: 'SA Smoothing Cleanser',
-    brand: 'CeraVe (Imported)',
-    price: 'PKR 3,800',
-    rating: 4.9,
-    reviews: 8560,
-    isHalal: true,
-    isOrganic: false,
-    category: 'Cleanser',
-    buyLinks: { daraz: 'https://daraz.pk' },
-    benefits: ['Exfoliating', 'For rough & bumpy skin', 'With ceramides'],
-    image: 'cerave_sa',
-  },
-  {
-    id: '8',
-    name: 'Anti-Aging Day Cream',
-    brand: 'Derma Shine PK',
-    price: 'PKR 950',
-    rating: 4.4,
-    reviews: 620,
-    isHalal: true,
-    isOrganic: false,
-    category: 'Moisturizer',
-    buyLinks: { daraz: 'https://daraz.pk' },
-    benefits: ['Reduces fine lines', 'Deeply hydrates', 'SPF 15 included'],
-    image: 'derma_shine',
-  },
-  {
-    id: '9',
-    name: 'Vitamin B3 Niacinamide',
-    brand: 'Organic Traveller PK',
-    price: 'PKR 1,850',
-    rating: 4.8,
-    reviews: 1100,
-    isHalal: true,
-    isOrganic: true,
-    category: 'Serum',
-    buyLinks: { daraz: 'https://daraz.pk' },
-    benefits: ['Pore tightening', 'Oil control', 'Brightens tone'],
-    image: 'niacinamide',
-  },
-  ];
+  const products: Product[] = [...pakistaniProducts, ...dbProducts];
+
+  const [diseaseSearch, setDiseaseSearch] = useState(initialSearch || '');
 
   const filteredProducts = products.filter((product) => {
     if (activeFilters.halalOnly && !product.isHalal) return false;
     if (activeFilters.organicOnly && !product.isOrganic) return false;
     if (activeFilters.underPKR3000 && parseFloat(product.price.replace(/[^0-9.]/g, '')) > 3000) return false;
     if (activeFilters.category && product.category !== activeFilters.category) return false;
+    
+    // Filter by manual search OR detected disease
+    if (diseaseSearch.trim() !== '') {
+      const search = diseaseSearch.trim().toLowerCase();
+      const targets = product.targetDiseases || [];
+      const matchName = product.name.toLowerCase().includes(search) || (product.category && product.category.toLowerCase().includes(search));
+      const matchDisease = targets.some(d => d.toLowerCase().includes(search));
+      if (!matchName && !matchDisease) return false;
+    } else {
+      const detected = result?.detectedDisease;
+      if (detected && product.targetDiseases && product.targetDiseases.length > 0) {
+        if (!product.targetDiseases.includes(detected) && !product.targetDiseases.includes('normal')) {
+          return false;
+        }
+      }
+    }
+    
     return true;
   });
 
@@ -251,7 +188,7 @@ function ProductRecommendations({ result, onNavigate, isGuest }: ProductRecommen
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-50 pt-20 md:pt-4">
+    <ScrollView style={{ flex: 1 }} className="bg-gray-50 pt-20 md:pt-4" contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}>
       <View className="p-4 md:p-8 max-w-7xl mx-auto w-full">
         <TouchableOpacity
           onPress={() => onNavigate('landing')}
@@ -285,6 +222,17 @@ function ProductRecommendations({ result, onNavigate, isGuest }: ProductRecommen
               <Text className="text-white font-bold ml-1">Try Natural Remedies</Text>
             </TouchableOpacity>
           </View>
+          
+          <View className="mb-4">
+            <TextInput
+              value={diseaseSearch}
+              onChangeText={setDiseaseSearch}
+              placeholder="Search by disease (e.g. acne, melasma...)"
+              className="w-full bg-gray-50 border border-gray-200 rounded-full px-4 py-2 text-sm text-gray-800"
+              placeholderTextColor="#9ca3af"
+            />
+          </View>
+
           <View className="flex-row flex-wrap gap-2">
             <FilterBadge label="All" active={activeFilters.category === null && !activeFilters.halalOnly && !activeFilters.organicOnly && !activeFilters.underPKR3000} onPress={clearFilters} />
             <FilterBadge label="Halal Only" active={activeFilters.halalOnly} onPress={() => toggleFilter('halalOnly')} />
@@ -336,7 +284,7 @@ function ProductRecommendations({ result, onNavigate, isGuest }: ProductRecommen
 }
 
 function ProductCard({ product, onOpenLink }: { product: Product, onOpenLink: (url: string) => void }) {
-  const imageUrl = PRODUCT_IMAGE_MAPPING[product.image] || null;
+  const imageUrl = PRODUCT_IMAGE_MAPPING[product.image] || product.image || null;
 
   return (
     <View className="bg-white rounded-[32px] overflow-hidden shadow-sm border border-gray-100 h-full flex-col transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-purple-200">
@@ -458,10 +406,11 @@ export default function ProductRecommendationsPage() {
   const result: SkinAnalysisResult | null = params.result ? JSON.parse(params.result as string) : null;
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <ProductRecommendations
         result={result}
         isGuest={isGuest}
+        initialSearch={params.searchQuery as string}
         onNavigate={(page: string) => {
           if (page === 'results' || page === 'landing') {
             router.push(isGuest ? '/' : '/patient/dashboard');

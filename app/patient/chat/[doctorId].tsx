@@ -15,10 +15,13 @@ export default function ChatWithDoctorPage() {
         const userRes = await api.getCurrentUser();
         const role = userRes?.user?.role || userRes?.user?.userType || userRes?.role || userRes?.userType;
         if (role !== 'patient') {
-          router.replace('/shared/login');
+          console.error('[ChatWithDoctorPage] Role mismatch:', role, userRes);
+          // router.replace('/shared/login');
         }
-      } catch (err) {
-        router.replace('/shared/login');
+      } catch (err: any) {
+        console.error('[ChatWithDoctorPage] Error in verifyRole:', err);
+        import('react-native').then(({ Alert }) => Alert.alert('Verify Role Error', String(err.message || err)));
+        // router.replace('/shared/login');
       }
     };
     verifyRole();

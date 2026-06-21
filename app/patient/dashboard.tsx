@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { Bell, Calendar, Camera, ChevronRight, MessageSquare, ShoppingBag, Sparkles, Sun, TrendingUp, Umbrella, User, Droplets, Thermometer, Wind, Cloud, CloudRain, CloudSnow, CloudLightning } from 'lucide-react-native';
+import { Bell, Calendar, Camera, ChevronRight, MessageSquare, ShoppingBag, Sparkles, Sun, TrendingUp, Umbrella, User, Droplets, Thermometer, Wind, Cloud, CloudRain, CloudSnow, CloudLightning, Info } from 'lucide-react-native';
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { ActivityIndicator, Alert, Dimensions, Image, Platform, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Footer from '../../components/Footer';
@@ -254,7 +254,7 @@ export default function PatientDashboard() {
 
     return (
         <View className="flex-1 bg-gray-50">
-            <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+            <ScrollView style={{ flex: 1 }} className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}>
                 {/* Header */}
                 <View className="px-6 pt-5 pb-2 flex-row justify-between items-center">
                     <View className="flex-row items-center gap-3">
@@ -294,7 +294,7 @@ export default function PatientDashboard() {
 
                 {/* Weather Card Mockup - Redesigned to look like a real widget */}
                 <View className="px-6 mt-4">
-                    <View className="bg-blue-600 rounded-[32px] p-6 shadow-lg flex-col md:flex-row justify-between items-center gap-6">
+                    <View className="bg-blue-600 rounded-[32px] p-6 shadow-lg">
                         {weatherError ? (
                             <View className="flex-1 py-4 justify-center items-center">
                                 <Text className="text-white font-bold text-lg">Unable to fetch weather right now</Text>
@@ -302,7 +302,8 @@ export default function PatientDashboard() {
                             </View>
                         ) : (
                             <>
-                                {/* Left Section: Temp & Condition */}
+                                <View className="flex-col md:flex-row justify-between items-center gap-6">
+                                    {/* Left Section: Temp & Condition */}
                                 <View className="flex-row items-center gap-4">
                                     <View className="bg-blue-500/50 p-4 rounded-3xl border border-blue-400">
                                         {renderWeatherIcon(weather.condition)}
@@ -357,6 +358,38 @@ export default function PatientDashboard() {
                                     <MessageSquare size={16} color="white" />
                                     <Text className="text-white font-bold text-sm">Chat with Doctor</Text>
                                 </TouchableOpacity>
+                            </View>
+
+                                {/* Weather-Based Skincare Tips */}
+                                <View className="mt-4 border-t border-blue-400/30 pt-4 w-full">
+                                    <Text className="text-blue-100 font-bold text-xs uppercase tracking-wider mb-2">Recommended for Current Weather</Text>
+                                    <View className="flex-row flex-wrap gap-2">
+                                        <View className="bg-white/10 px-3 py-1.5 rounded-full flex-row items-center gap-1.5 border border-white/20">
+                                            <Sun size={12} color="#fcd34d" />
+                                            <Text className="text-white text-xs font-medium">
+                                                {weather.uvVal && parseInt(weather.uvVal) >= 5 ? 'SPF 50+ Sunscreen' : 'SPF 30 Sunscreen'}
+                                            </Text>
+                                        </View>
+                                        <View className="bg-white/10 px-3 py-1.5 rounded-full flex-row items-center gap-1.5 border border-white/20">
+                                            <Droplets size={12} color="#93c5fd" />
+                                            <Text className="text-white text-xs font-medium">
+                                                {weather.humidity && parseInt(weather.humidity) < 40 ? 'Heavy Moisturizer' : (weather.temp && parseInt(weather.temp) >= 30 ? 'Light Moisturizer' : 'Daily Moisturizer')}
+                                            </Text>
+                                        </View>
+                                        {weather.temp && parseInt(weather.temp) >= 30 && (
+                                            <View className="bg-white/10 px-3 py-1.5 rounded-full flex-row items-center gap-1.5 border border-white/20">
+                                                <Wind size={12} color="#86efac" />
+                                                <Text className="text-white text-xs font-medium">Salicylic Acid Wash (Oil Control)</Text>
+                                            </View>
+                                        )}
+                                        {weather.humidity && parseInt(weather.humidity) >= 70 && (
+                                            <View className="bg-white/10 px-3 py-1.5 rounded-full flex-row items-center gap-1.5 border border-white/20">
+                                                <Sparkles size={12} color="#d8b4fe" />
+                                                <Text className="text-white text-xs font-medium">Clay Mask (Pore Detox)</Text>
+                                            </View>
+                                        )}
+                                    </View>
+                                </View>
                             </>
                         )}
                     </View>
@@ -545,7 +578,16 @@ export default function PatientDashboard() {
                                     </View>
                                 </View>
                                 {apt.status === 'confirmed' && (
-                                    <TouchableOpacity className="bg-blue-600 px-4 py-2 rounded-xl">
+                                    <TouchableOpacity 
+                                        className="bg-blue-600 px-4 py-2 rounded-xl"
+                                        onPress={() => {
+                                            if (apt.doctor && apt.doctor._id) {
+                                                router.push(`/patient/chat/${apt.doctor._id}`);
+                                            } else {
+                                                router.push('/patient/chat');
+                                            }
+                                        }}
+                                    >
                                         <Text className="text-white font-bold text-xs">JOIN</Text>
                                     </TouchableOpacity>
                                 )}

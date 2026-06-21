@@ -3,8 +3,13 @@ import { Stack, usePathname } from 'expo-router';
 import { View, SafeAreaView, Platform, StatusBar } from 'react-native';
 import Header from '../components/Header';
 
+if (typeof global !== 'undefined' && global.ErrorUtils) {
+  global.ErrorUtils.setGlobalHandler((error, isFatal) => {
+    console.error('FATAL ERROR CAUGHT:', error);
+  });
+}
+
 export default function RootLayout() {
-  const pathname = usePathname();
   // We can skip the global header if the user is in a login/signup screen if we want,
   // but Header.tsx already has a small clean state or hides itself if needed.
   

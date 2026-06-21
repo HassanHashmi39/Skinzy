@@ -1,11 +1,22 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
-// ✅ MERN Backend Base URL
-// On web (browser on same machine), use localhost to avoid macOS firewall blocking LAN IP.
-// On physical device (Expo Go), set EXPO_PUBLIC_API_URL=http://192.168.1.11:4445/api
+import Constants from 'expo-constants';
+
+// ✅ Dynamically determine Backend IP for Expo Go (LAN/Tunnel)
 const isWeb = typeof window !== 'undefined' && typeof document !== 'undefined';
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || (isWeb ? 'http://localhost:4445/api' : 'http://192.168.1.6:4445/api');
+let serverIp = '10.9.148.215'; // Default fallback (Current Laptop IP)
+
+// Only use the Expo host IP if it's an actual IP address (e.g. 192.168.x.x), 
+// NOT if it's an ngrok tunnel (since ngrok doesn't forward port 4445 automatically).
+if (!isWeb && Constants?.expoConfig?.hostUri) {
+  const host = Constants.expoConfig.hostUri.split(':')[0];
+  if (host.match(/^[0-9.]+$/)) {
+    serverIp = host;
+  }
+}
+
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || (isWeb ? 'http://localhost:4445/api' : `http://${serverIp}:4445/api`);
 export const SOCKET_URL = API_BASE_URL.replace('/api', '');
 
 // ─────────────────────────────────────────────
@@ -311,6 +322,14 @@ export async function getMedicalHistory(patientId: string) {
 
 export async function getDoctors() {
   return await apiCall('/doctors', {}, true);
+}
+
+export async function getDoctorDetails(doctorId: string) {
+  return await apiCall(`/doctors/${doctorId}`, {}, true);
+}
+
+export async function getDoctorFeedbacks(doctorId: string) {
+  return await apiCall(`/feedbacks/doctor/${doctorId}`, {}, true);
 }
 
 export async function submitRating(appointmentId: string, rating: number, comment: string) {

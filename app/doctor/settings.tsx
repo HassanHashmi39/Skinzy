@@ -2,7 +2,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Camera, Save, LogOut, Check, Info } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View, Switch } from 'react-native';
+import { ActivityIndicator, Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View, Switch } from 'react-native';
 import * as api from '../../utils/api';
 
 type DoctorInfo = {
@@ -154,7 +154,7 @@ export function DoctorSettings({ doctorInfo, onBack, onLogout }: DoctorSettingsP
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-50" showsVerticalScrollIndicator={false}>
+    <ScrollView style={{ flex: 1 }} className="flex-1 bg-gray-50" showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}>
       {/* Top Header Section */}
       <View className="bg-white pt-6 pb-8 px-6 rounded-b-[32px] shadow-sm border-b border-gray-100 mb-6">
         <View className="flex-row justify-between items-center mb-6">
@@ -369,7 +369,7 @@ export default function DoctorSettingsPage() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-gray-50">
       <DoctorSettings
         doctorInfo={doctorInfo}
         onBack={() => router.back()}
@@ -378,6 +378,6 @@ export default function DoctorSettingsPage() {
           router.replace('/shared/login');
         }}
       />
-    </SafeAreaView>
+    </View>
   );
 }

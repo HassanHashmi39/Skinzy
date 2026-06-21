@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Alert, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ArrowLeft, Send, Star } from 'lucide-react-native';
 import { useState } from 'react';
 export type Page = 'landing' | 'analysis' | 'results' | 'products' | 'routine' | 'appointments' | 'remedies' | 'chat' | 'history' | 'notifications' | 'profile' | 'feedback';
@@ -133,13 +133,13 @@ export default function FeedbackPage() {
     const router = useRouter();
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
+        <View className="flex-1 bg-white">
             <Feedback
                 onNavigate={(page) => {
                     if (page === 'landing') router.push('/');
                     else router.back();
                 }}
             />
-        </SafeAreaView>
+        </View>
     );
 }

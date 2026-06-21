@@ -2,7 +2,6 @@ import { useRouter } from 'expo-router';
 import { ArrowLeft, BookOpen, AlertTriangle, FileText, Activity, HelpCircle } from 'lucide-react-native';
 import React from 'react';
 import { 
-    SafeAreaView, 
     ScrollView, 
     Text, 
     TouchableOpacity, 
@@ -36,7 +35,7 @@ export default function TermsOfUsePage() {
     ];
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
+        <View style={{ flex: 1, backgroundColor: '#fff' }}>
             <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100">
                 <TouchableOpacity 
                     onPress={() => router.back()}
@@ -48,7 +47,7 @@ export default function TermsOfUsePage() {
                 <View className="w-10 h-10" /> {/* Spacer for centering */}
             </View>
 
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false} className="px-6 py-6">
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }} showsVerticalScrollIndicator={false} className="px-6 py-6">
                 {/* Header Badge */}
                 <View className="items-center mb-8">
                     <View className="w-16 h-16 bg-purple-50 rounded-3xl items-center justify-center mb-4 border border-purple-100">
@@ -83,6 +82,6 @@ export default function TermsOfUsePage() {
                     ))}
                 </View>
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 }

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Feedback = require('../models/Feedback');
+const Report = require('../models/Report');
 const Appointment = require('../models/Appointment');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
@@ -66,6 +67,47 @@ router.post('/', protect, async (req, res) => {
         });
 
         res.status(201).json({ feedback });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// @desc    Report a doctor
+// @route   POST /api/feedbacks/report
+// @access  Private (Patient only)
+router.post('/report', protect, async (req, res) => {
+    try {
+        const { doctorId, reason, description } = req.body;
+
+        if (req.user.userType !== 'patient') {
+            return res.status(403).json({ message: 'Only patients can submit reports' });
+        }
+
+        const doctor = await User.findById(doctorId);
+        if (!doctor || doctor.userType !== 'doctor') {
+            return res.status(404).json({ message: 'Doctor not found' });
+        }
+
+        const report = await Report.create({
+            patient: req.user.id,
+            doctor: doctorId,
+            reason,
+            description
+        });
+
+        // Create notification for Admin
+        const admins = await User.find({ userType: 'admin' });
+        for (const admin of admins) {
+            await Notification.create({
+                user: admin._id,
+                type: 'report',
+                title: 'New Doctor Report Filed',
+                message: `A patient has filed a report against ${doctor.name} for ${reason}.`,
+                relatedId: report._id
+            });
+        }
+
+        res.status(201).json({ report });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

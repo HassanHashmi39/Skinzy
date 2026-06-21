@@ -62,6 +62,9 @@ app.use((req, res, next) => {
 // Authentication
 app.use('/api/auth', require('./routes/authRoutes'));
 
+// Admin
+app.use('/api/admin', require('./routes/adminRoutes'));
+
 // Business Logic
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/patients', require('./routes/patientRoutes'));
@@ -74,6 +77,7 @@ app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/feedbacks', require('./routes/feedbackRoutes'));
 app.use('/api/weather', require('./routes/weatherRoutes'));
 app.use('/api/contact', require('./routes/contactRoutes'));
+app.use('/api/inventory', require('./routes/productRoutes'));
 
 // Health check
 app.get('/api/health', (req, res) => {

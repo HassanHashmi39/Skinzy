@@ -11,7 +11,7 @@ const Appointment = require('../models/Appointment');
 router.get('/', protect, async (req, res) => {
     try {
         console.log('🔍 Fetching all doctors...');
-        const doctors = await User.find({ userType: 'doctor' })
+        const doctors = await User.find({ userType: 'doctor', verificationStatus: 'verified' })
             .select('-password');
         console.log(`✅ Found ${doctors.length} doctors`);
         res.json({ doctors });
@@ -65,6 +65,10 @@ router.get('/:id/slots', protect, async (req, res) => {
         const doctor = await User.findById(req.params.id);
         if (!doctor || doctor.userType !== 'doctor') {
             return res.status(404).json({ message: 'Doctor not found' });
+        }
+        
+        if (doctor.verificationStatus !== 'verified') {
+            return res.status(403).json({ message: 'Doctor is not verified yet. Cannot book appointments.' });
         }
 
         const defaultSlots = ['09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '02:00 PM', '03:00 PM', '04:00 PM', '05:00 PM'];

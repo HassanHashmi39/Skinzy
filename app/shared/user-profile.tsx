@@ -7,10 +7,9 @@ import {
 } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { 
-    ActivityIndicator, 
-    Alert, 
+    ActivityIndicator,
+    Alert,
     Image, 
-    SafeAreaView, 
     ScrollView, 
     Text, 
     TouchableOpacity, 
@@ -199,9 +198,9 @@ export default function UserProfile() {
 
     if (isLoading && !userData) {
         return (
-            <SafeAreaView className="flex-1 bg-white justify-center items-center">
+            <View className="flex-1 bg-white justify-center items-center">
                 <ActivityIndicator size="large" color="#7C3AED" />
-            </SafeAreaView>
+            </View>
         );
     }
 
@@ -220,8 +219,8 @@ export default function UserProfile() {
     const calculatedScore = getCalculatedScore();
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
-            <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+        <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
+            <ScrollView style={{ flex: 1 }} className="bg-gray-50" showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}>
                 {/* Top Navigation Row */}
                 <View className="flex-row justify-between items-center mb-6 px-6 pt-6">
                     <TouchableOpacity 
@@ -601,7 +600,7 @@ export default function UserProfile() {
                     )}
                 </View>
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 }
 

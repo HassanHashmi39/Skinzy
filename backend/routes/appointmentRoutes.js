@@ -121,6 +121,13 @@ router.patch('/:id/status', protect, async (req, res) => {
             return res.status(403).json({ message: 'Access denied: Unauthorized to update this appointment status' });
         }
 
+        // Backfill missing dateTime for legacy appointments to pass schema validation
+        if (!appointment.dateTime) {
+            // Attempt to parse appointmentDate and Time, fallback to now if unparseable
+            const parsedDate = new Date(`${appointment.appointmentDate} ${appointment.appointmentTime}`);
+            appointment.dateTime = isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
+        }
+
         appointment.status = status;
         await appointment.save();
 
@@ -162,6 +169,7 @@ router.patch('/:id/status', protect, async (req, res) => {
 
         res.json({ appointment });
     } catch (error) {
+        console.error('[STATUS UPDATE ERROR]', error);
         res.status(500).json({ message: error.message });
     }
 });

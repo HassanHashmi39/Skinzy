@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { SafeAreaView, ScrollView, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
 import { ArrowLeft, Bell, Calendar, CheckCircle, Clock, MessageCircle, UserPlus, Trash2, Wifi } from 'lucide-react-native';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
@@ -299,8 +299,8 @@ export function DoctorNotifications({ onBack, onNewNotification }: DoctorNotific
 export default function DoctorNotificationsPage() {
   const router = useRouter();
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1 bg-white">
       <DoctorNotifications onBack={() => router.replace('/doctor/dashboard')} />
-    </SafeAreaView>
+    </View>
   );
 }

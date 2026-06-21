@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { ActivityIndicator, Alert, SafeAreaView, ScrollView, Text, TouchableOpacity, View, Image } from 'react-native';
-import { ArrowLeft, Calendar, Check, MapPin, Star, Video, Clock } from 'lucide-react-native';
+import { ArrowLeft, Calendar, Check, MapPin, Star, Video, Clock, User } from 'lucide-react-native';
 import React, { useState, useEffect } from 'react';
 import * as api from '../../utils/api';
 
@@ -302,6 +302,7 @@ function DoctorCard({
   selected: boolean;
   onSelect: () => void;
 }) {
+  const router = useRouter();
   return (
     <TouchableOpacity
       onPress={onSelect}
@@ -347,6 +348,18 @@ function DoctorCard({
               </View>
             <Text className="text-purple-600 font-bold ml-2">PKR {doctor.consultationFee || '2500'}</Text>
           </View>
+
+          {/* View Profile Button */}
+          <TouchableOpacity 
+            onPress={(e) => {
+                e.stopPropagation(); // Prevent selecting the doctor simultaneously
+                router.push(`/patient/doctor/${doctor._id}`);
+            }}
+            className="mt-4 bg-purple-50 py-2.5 rounded-xl border border-purple-100 flex-row items-center justify-center gap-1.5"
+          >
+            <User size={14} color="#9333EA" />
+            <Text className="text-purple-700 font-bold text-xs">View Full Profile</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </TouchableOpacity>

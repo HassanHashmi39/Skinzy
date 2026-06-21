@@ -1,7 +1,7 @@
-import { ActivityIndicator, Alert, Image, Platform, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Footer from '../../components/Footer';
 import { Stack, useRouter } from 'expo-router';
-import { Bell, Calendar, Clock, MessageCircle, Settings, Trash2, TrendingUp, User } from 'lucide-react-native';
+import { Bell, Calendar, Clock, MessageCircle, Settings, Trash2, TrendingUp, User, LogOut, Star } from 'lucide-react-native';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import * as api from '../../utils/api';
@@ -47,7 +47,7 @@ type Patient = {
 
 function DoctorDashboard() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'overview' | 'appointments' | 'patients' | 'schedule' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'appointments' | 'patients' | 'schedule' | 'settings' | 'reviews'>('overview');
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
   const [showChat, setShowChat] = useState(false);
@@ -56,6 +56,7 @@ function DoctorDashboard() {
   const [doctorData, setDoctorData] = useState<any>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const socketRef = useRef<Socket | null>(null);
@@ -157,6 +158,13 @@ function DoctorDashboard() {
         setUnreadNotifications(unread);
         setUnreadMessages(unreadMsgs);
       }
+
+      if (profile?.user?._id) {
+        const fbData = await api.getDoctorFeedbacks(profile.user._id);
+        if (fbData && fbData.feedbacks) {
+          setFeedbacks(fbData.feedbacks);
+        }
+      }
       
       setIsLoading(false);
     } catch (err) {
@@ -216,6 +224,24 @@ function DoctorDashboard() {
     }
   };
 
+  const handleCompleteAppointment = async (id: string) => {
+    try {
+      await api.updateAppointmentStatus(id, 'completed');
+      setAppointments(prev => prev.map(apt => apt._id === id ? { ...apt, status: 'completed' } : apt));
+      if (Platform.OS === 'web') {
+        window.alert('Appointment marked as completed');
+      } else {
+        Alert.alert('Success', 'Appointment marked as completed');
+      }
+    } catch (e: any) {
+      if (Platform.OS === 'web') {
+        window.alert('Failed to complete appointment: ' + (e.message || e));
+      } else {
+        Alert.alert('Error', 'Failed to complete appointment: ' + (e.message || e));
+      }
+    }
+  };
+
   const handleLogout = async () => {
     console.log('🔘 Doctor Logout clicked');
     await api.logout();
@@ -224,9 +250,32 @@ function DoctorDashboard() {
 
   if (isLoading && !doctorData) {
     return (
-      <SafeAreaView className="flex-1 bg-white justify-center items-center">
+      <View className="flex-1 bg-white justify-center items-center">
         <ActivityIndicator size="large" color="#9333EA" />
-      </SafeAreaView>
+      </View>
+    );
+  }
+
+  if (doctorData && doctorData.verificationStatus !== 'verified') {
+    return (
+      <View className="flex-1 bg-gray-50 justify-center items-center p-6">
+        <View className="bg-white p-8 rounded-3xl shadow-sm items-center w-full max-w-md">
+          <View className="w-20 h-20 bg-yellow-100 rounded-full items-center justify-center mb-6">
+            <Clock size={40} color="#CA8A04" />
+          </View>
+          <Text className="text-2xl font-bold text-gray-900 mb-3 text-center">Account Under Review</Text>
+          <Text className="text-gray-500 text-center mb-8 leading-6">
+            Your doctor profile is currently being reviewed by our administration team. You will be able to access your dashboard and receive appointments once your account is verified.
+          </Text>
+          <TouchableOpacity 
+            onPress={handleLogout}
+            className="bg-purple-600 w-full py-4 rounded-xl flex-row justify-center items-center gap-2"
+          >
+            <LogOut color="white" size={20} />
+            <Text className="text-white font-bold text-lg">Logout</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     );
   }
 
@@ -265,7 +314,7 @@ function DoctorDashboard() {
 
   return (
     <View className="flex-1 bg-gray-50">
-      <ScrollView className="flex-1 p-4" showsVerticalScrollIndicator={false}>
+      <ScrollView style={{ flex: 1 }} className="flex-1 p-4" showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}>
         {/* Header */}
         <View className="bg-white rounded-3xl p-6 mb-6 shadow-sm">
           <View className="flex-row items-center justify-between mb-6">
@@ -349,8 +398,8 @@ function DoctorDashboard() {
         </View>
 
         {/* Tabs - Horizontal Scroll */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row mb-6 py-1">
-          {['overview', 'appointments', 'patients', 'schedule'].map((tab) => (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-6 mb-6">
+          {['overview', 'appointments', 'patients', 'reviews'].map((tab) => (
             <TouchableOpacity
               key={tab}
               onPress={() => setActiveTab(tab as any)}
@@ -373,6 +422,7 @@ function DoctorDashboard() {
                   key={appointment._id}
                   appointment={appointment}
                   onAccept={handleAcceptAppointment}
+                  onComplete={handleCompleteAppointment}
                   onDelete={handleDeleteAppointment}
                   onViewDetails={(id) => setSelectedAppointmentId(id)}
                 />
@@ -389,6 +439,7 @@ function DoctorDashboard() {
                   key={appointment._id}
                   appointment={appointment}
                   onAccept={handleAcceptAppointment}
+                  onComplete={handleCompleteAppointment}
                   onDelete={handleDeleteAppointment}
                   onViewDetails={(id) => setSelectedAppointmentId(id)}
                 />
@@ -408,6 +459,7 @@ function DoctorDashboard() {
                 key={appointment._id}
                 appointment={appointment}
                 onAccept={handleAcceptAppointment}
+                onComplete={handleCompleteAppointment}
                 onDelete={handleDeleteAppointment}
                 onViewDetails={(id) => setSelectedAppointmentId(id)}
               />
@@ -452,6 +504,33 @@ function DoctorDashboard() {
           </View>
         )}
 
+        {activeTab === 'reviews' && (
+          <View className="bg-white rounded-2xl p-6 shadow-sm">
+            <Text className="text-lg font-bold mb-4">Patient Reviews</Text>
+            {feedbacks.length > 0 ? (
+              feedbacks.map((feedback: any) => (
+                <View key={feedback._id} className="p-4 bg-gray-50 rounded-xl mb-3 border border-gray-100">
+                  <View className="flex-row justify-between mb-2">
+                    <Text className="font-bold text-gray-900">{feedback.patient?.name || 'Anonymous'}</Text>
+                    <View className="flex-row items-center gap-1">
+                      <Star size={14} color="#F59E0B" fill="#F59E0B" />
+                      <Text className="text-amber-600 font-bold text-sm">{feedback.rating}/5</Text>
+                    </View>
+                  </View>
+                  {feedback.comment ? (
+                    <Text className="text-gray-600 text-sm italic">"{feedback.comment}"</Text>
+                  ) : (
+                    <Text className="text-gray-400 text-sm italic">No comment provided</Text>
+                  )}
+                  <Text className="text-xs text-gray-400 mt-2">{new Date(feedback.createdAt).toLocaleDateString()}</Text>
+                </View>
+              ))
+            ) : (
+              <Text className="text-gray-500 text-center py-4">No reviews yet</Text>
+            )}
+          </View>
+        )}
+
         {/* Stats Card at bottom of overview */}
         {activeTab === 'overview' && (
           <View className="mt-6 bg-purple-600 rounded-2xl p-6 mb-10">
@@ -492,11 +571,13 @@ function StatCard({ icon, label, value, bgColor }: { icon: React.ReactNode; labe
 function AppointmentCard({
   appointment,
   onAccept,
+  onComplete,
   onDelete,
   onViewDetails
 }: {
   appointment: Appointment;
   onAccept: (id: string) => void;
+  onComplete?: (id: string) => void;
   onDelete: (id: string) => void;
   onViewDetails: (id: string) => void;
 }) {
@@ -541,6 +622,14 @@ function AppointmentCard({
             className="flex-1 bg-purple-600 py-2 rounded-lg items-center shadow-sm shadow-purple-100"
           >
             <Text className="text-white font-medium text-xs">Accept</Text>
+          </TouchableOpacity>
+        )}
+        {appointment.status === 'confirmed' && onComplete && (
+          <TouchableOpacity
+            onPress={() => onComplete(appointment._id)}
+            className="flex-1 bg-green-600 py-2 rounded-lg items-center shadow-sm shadow-green-100"
+          >
+            <Text className="text-white font-medium text-xs">Complete</Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity

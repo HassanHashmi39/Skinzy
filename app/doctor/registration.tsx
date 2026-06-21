@@ -1,8 +1,9 @@
 import * as api from '../../utils/api';
 import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ArrowLeft, Calendar, CheckCircle, FileText, Upload, User } from 'lucide-react-native';
 import { Picker } from '@react-native-picker/picker';
 import { filterNameInput, filterPhoneInput, filterNumberInput, isValidEmail, validatePassword } from '../../utils/validation';
@@ -274,6 +275,30 @@ function DoctorRegistration({ onNavigate, onRegistrationComplete }: DoctorRegist
     setError('');
 
     try {
+      const readFileAsBase64 = async (file: any): Promise<string> => {
+        if (!file?.uri) return '';
+        if (Platform.OS === 'web') {
+           const res = await fetch(file.uri);
+           const blob = await res.blob();
+           return new Promise((resolve, reject) => {
+             const reader = new FileReader();
+             reader.onloadend = () => resolve(reader.result as string);
+             reader.onerror = reject;
+             reader.readAsDataURL(blob);
+           });
+        } else {
+           const base64Data = await FileSystem.readAsStringAsync(file.uri, { encoding: FileSystem.EncodingType.Base64 });
+           return `data:${file.mimeType || 'image/jpeg'};base64,${base64Data}`;
+        }
+      };
+
+      const verificationDocuments = {
+        license: await readFileAsBase64(documents.license),
+        cnicFront: await readFileAsBase64(documents.cnicFront),
+        cnicBack: await readFileAsBase64(documents.cnicBack),
+        certificate: await readFileAsBase64(documents.certificate)
+      };
+
       await api.signUp({
         email: formData.email.trim(),
         password,
@@ -287,6 +312,7 @@ function DoctorRegistration({ onNavigate, onRegistrationComplete }: DoctorRegist
         consultationFee: formData.consultationFee.trim(),
         availability: formData.availability,
         joinDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+        verificationDocuments
       });
 
       showToast("Doctor account created successfully", "success");
@@ -324,7 +350,7 @@ function DoctorRegistration({ onNavigate, onRegistrationComplete }: DoctorRegist
         onHide={() => setToastVisible(false)}
       />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" className="bg-white">
-        <SafeAreaView className="flex-1">
+        <View className="flex-1">
           <View className="px-4 py-8">
             <View className="max-w-3xl mx-auto w-full">
               {/* Header */}
@@ -736,7 +762,7 @@ function DoctorRegistration({ onNavigate, onRegistrationComplete }: DoctorRegist
               </View>
             </View>
           </View>
-        </SafeAreaView>
+        </View>
       </ScrollView>
     </>
   );

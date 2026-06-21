@@ -7,7 +7,6 @@ import {
     KeyboardAvoidingView, 
     Modal,
     Platform, 
-    SafeAreaView, 
     ScrollView, 
     Text, 
     TextInput, 
@@ -91,16 +90,18 @@ export default function LoginPage() {
                     return;
                 }
 
-                showToast(role === 'doctor' ? "Doctor login successful" : "Patient login successful", "success");
+                showToast(role === 'doctor' ? "Doctor login successful" : role === 'admin' ? "Admin login successful" : "Patient login successful", "success");
                 
                 setTimeout(() => {
                     setIsLoading(false);
                     if (role === 'doctor') {
                         router.replace('/doctor/dashboard' as any);
+                    } else if (role === 'admin') {
+                        router.replace('/admin/dashboard' as any);
                     } else {
                         router.replace('/patient/dashboard' as any);
                     }
-                }, 1500);
+                }, 1000);
             } else {
                 showToast(response?.message || 'Invalid credentials', "error");
                 setIsLoading(false);
@@ -190,7 +191,7 @@ export default function LoginPage() {
                 type={toastType}
                 onHide={() => setToastVisible(false)}
             />
-            <SafeAreaView className="flex-1 bg-white">
+            <View className="flex-1 bg-white">
                 <KeyboardAvoidingView 
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                     className="flex-1"
@@ -300,7 +301,7 @@ export default function LoginPage() {
                         </View>
                     </ScrollView>
                 </KeyboardAvoidingView>
-            </SafeAreaView>
+            </View>
 
             {/* Forgot Password Modal */}
             <Modal

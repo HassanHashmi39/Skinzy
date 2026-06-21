@@ -6,10 +6,11 @@ import Footer from '../../../components/Footer';
 import * as api from '../../../utils/api';
 import { generatePDF } from '../../../utils/pdfHelper';
 import { SkinAnalysisResult } from '../../../utils/types';
+import { diseaseData } from '../../../utils/diseaseData';
 
 type AnalysisResultsProps = {
   result: SkinAnalysisResult;
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, extraParams?: any) => void;
   isGuest: boolean;
 };
 
@@ -41,8 +42,18 @@ function AnalysisResults({ result, onNavigate, isGuest }: AnalysisResultsProps) 
     }
   };
 
+  const detectedKey = result.detectedDisease?.toLowerCase().replace(/ /g, '_') || 'normal';
+  const matchedDisease = Object.entries(diseaseData).find(([key]) => key.includes(detectedKey) || detectedKey.includes(key));
+  const diseaseInfo = matchedDisease ? matchedDisease[1] : (diseaseData['normal'] || {} as any);
+  const isSerious = diseaseInfo?.severity?.toLowerCase().includes('high');
+
   return (
-    <ScrollView className=" bg-gray-50" contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView 
+      style={{ flex: 1 }} 
+      className="bg-gray-50" 
+      contentContainerStyle={{ paddingBottom: 80, flexGrow: 1 }}
+      showsVerticalScrollIndicator={true}
+    >
       {/* Back Button */}
       <View className="px-6 pt-4 flex-row items-center gap-3">
         <TouchableOpacity
@@ -104,11 +115,19 @@ function AnalysisResults({ result, onNavigate, isGuest }: AnalysisResultsProps) 
           )}
 
           {(result.conditionLevel?.toLowerCase() === 'moderate' || result.conditionLevel?.toLowerCase() === 'mild') && (
-            <View className="p-4 rounded-2xl bg-yellow-50 border border-yellow-200 flex-row items-center gap-3">
-              <AlertCircle size={24} color="#a16207" />
-              <View className="flex-1">
-                <Text className="text-yellow-800 font-bold text-base">Moderate Condition</Text>
-                <Text className="text-yellow-700 text-sm">Your skin needs some attention. Follow the recommended action plan below.</Text>
+            <View className="p-4 rounded-2xl bg-yellow-50 border border-yellow-200">
+              <View className="flex-row items-center gap-3">
+                <AlertCircle size={24} color="#a16207" />
+                <View className="flex-1">
+                  <Text className="text-yellow-800 font-bold text-base">Moderate Condition</Text>
+                  <Text className="text-yellow-700 text-sm">Your skin needs some attention. Follow the recommended action plan below.</Text>
+                </View>
+              </View>
+              <View className="flex-row items-start mt-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                <AlertCircle size={16} color="#6b7280" style={{ marginTop: 2, marginRight: 8 }} />
+                <Text className="text-sm text-gray-600 italic flex-1 leading-5">
+                  <Text className="font-bold">Disclaimer:</Text> These are supportive care tips and do not replace professional medical treatment, especially for infections, autoimmune diseases, or suspected skin cancers.
+                </Text>
               </View>
             </View>
           )}
@@ -133,42 +152,63 @@ function AnalysisResults({ result, onNavigate, isGuest }: AnalysisResultsProps) 
           )}
         </View>
 
-        {/* Skin Profile */}
-        <View className="flex-row gap-4 mb-4">
-          <View className="flex-1 bg-gray-50 rounded-xl p-4 border border-gray-100">
-            <Text className="text-gray-600 text-xs mb-1 font-medium">Skin Category:</Text>
-            <Text className="text-gray-900 font-bold">{result.skinType}</Text>
-          </View>
-          <View className="flex-1 bg-gray-50 rounded-xl p-4 border border-gray-100">
-            <Text className="text-gray-600 text-xs mb-1 font-medium">Skin Tone:</Text>
-            <Text className="text-gray-900 font-bold">{result.skinTone}</Text>
-          </View>
-        </View>
       </View>
 
       <View className="bg-white m-4 mt-0 rounded-3xl shadow-sm p-6 mb-8">
-        <Text className="text-xl font-bold mb-6 text-gray-900">Your Action Plan</Text>
+        <Text className="text-xl font-bold mb-4 text-gray-900">Your Action Plan</Text>
+        
+        {/* Disease Overview */}
+        {result.conditionLevel !== 'good' && diseaseInfo?.disease !== 'Normal / Healthy Skin' && (
+          <View className="mb-6 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+            <Text className="text-lg font-bold text-gray-900 mb-2">{diseaseInfo?.disease || 'Skin Analysis'}</Text>
+            <Text className="text-gray-600 mb-4">{diseaseInfo?.description || 'Follow the recommended action plan.'}</Text>
+            
+            <Text className="font-bold text-gray-800 mb-2">Common Symptoms:</Text>
+            <View className="flex-row flex-wrap gap-2 mb-4">
+              {diseaseInfo?.symptoms?.map((sym: string, i: number) => (
+                <View key={i} className="bg-white px-3 py-1.5 rounded-full border border-gray-200">
+                  <Text className="text-gray-700 text-sm">{sym}</Text>
+                </View>
+              ))}
+            </View>
+
+            <Text className="font-bold text-gray-800 mb-2">Common Causes:</Text>
+            <View className="flex-row flex-wrap gap-2">
+              {diseaseInfo?.causes?.map((cause: string, i: number) => (
+                <View key={i} className="bg-purple-50 px-3 py-1.5 rounded-full border border-purple-100">
+                  <Text className="text-purple-800 text-sm">{cause}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Doctor Consultation - Highlights if Serious */}
+        <View className={`mb-6 p-4 rounded-2xl border ${isSerious ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'}`}>
+          <View className="flex-row items-center gap-2 mb-2">
+            {isSerious ? <ShieldAlert size={20} color="#dc2626" /> : <Activity size={20} color="#2563eb" />}
+            <Text className={`font-bold text-lg ${isSerious ? 'text-red-800' : 'text-blue-900'}`}>Medical Advice</Text>
+          </View>
+          <Text className={isSerious ? 'text-red-700 font-medium' : 'text-blue-800'}>{diseaseInfo?.doctor_when || 'Consult a dermatologist for personalized advice.'}</Text>
+          {isSerious && (
+            <TouchableOpacity
+              onPress={() => onNavigate('appointments')}
+              className="mt-4 bg-red-600 py-3 rounded-xl items-center flex-row justify-center gap-2"
+            >
+              <Text className="text-white font-bold text-base">Consult a Doctor Now</Text>
+              <ArrowRight size={18} color="white" />
+            </TouchableOpacity>
+          )}
+        </View>
 
         {/* Daily Routine */}
         <View className="mb-6 gap-3">
           <View className="bg-blue-50 p-4 rounded-2xl">
             <View className="flex-row items-center gap-2 mb-3">
-              <Coffee size={20} color="#2563eb" />
+              <Sun size={20} color="#2563eb" />
               <Text className="text-blue-900 font-bold text-lg">Morning Routine</Text>
             </View>
-            {(
-              result.morningRoutine && result.morningRoutine.length > 0
-                ? result.morningRoutine
-                : (
-                  result.skinType?.toLowerCase().includes('oily')
-                    ? ['1. Foaming Cleanser', '2. Niacinamide Serum', '3. Oil-free Sunscreen SPF 50+']
-                    : result.skinType?.toLowerCase().includes('dry')
-                      ? ['1. Hydrating Cleanser', '2. Hyaluronic Acid Serum', '3. Moisturizing Sunscreen SPF 50+']
-                      : result.skinType?.toLowerCase().includes('sensitive')
-                        ? ['1. Milk Cleanser', '2. Soothing Centella Serum', '3. Mineral Sunscreen SPF 50+']
-                        : ['1. Gentle Cleanser', '2. Active Serum (e.g. Vitamin C)', '3. Sunscreen SPF 60+']
-                )
-            ).map((step, i) => (
+            {diseaseInfo?.morning_routine?.map((step: string, i: number) => (
               <Text key={i} className="text-blue-800 mb-1 font-medium">• {step}</Text>
             ))}
           </View>
@@ -177,124 +217,88 @@ function AnalysisResults({ result, onNavigate, isGuest }: AnalysisResultsProps) 
               <Moon size={20} color="#4f46e5" />
               <Text className="text-indigo-900 font-bold text-lg">Night Routine</Text>
             </View>
-            {(
-              result.nightRoutine && result.nightRoutine.length > 0
-                ? result.nightRoutine
-                : (
-                  result.detectedDisease && result.detectedDisease !== 'Healthy'
-                    ? ['1. Double Cleanse', `2. Targeted Treatment (for ${result.detectedDisease})`, '3. Reparative Moisturizer']
-                    : result.skinType?.toLowerCase().includes('oily')
-                      ? ['1. Micellar Water', '2. Salicylic Acid Cleanser', '3. Light Gel Moisturizer']
-                      : result.skinType?.toLowerCase().includes('dry')
-                        ? ['1. Cleansing Balm', '2. Hydrating Cleanser', '3. Rich Night Cream']
-                        : ['1. Double Cleanse', '2. Gentle Exfoliation (1-2x/week)', '3. Reparative Moisturizer']
-                )
-            ).map((step, i) => (
+            {diseaseInfo?.night_routine?.map((step: string, i: number) => (
               <Text key={i} className="text-indigo-800 mb-1 font-medium">• {step}</Text>
             ))}
           </View>
         </View>
 
-        {/* Dos & Don'ts */}
+        {/* Recommended Ingredients & Avoid */}
         <View className="mb-6 gap-3 flex-row">
           <View className="flex-1 border border-green-200 bg-green-50 p-4 rounded-2xl">
-            <View className="flex-row items-center gap-2 mb-2">
-              <CheckCircle2 size={16} color="#15803d" />
-              <Text className="font-bold text-green-800 text-base">Do's</Text>
+            <View className="flex-row items-center gap-2 mb-3">
+              <CheckCircle2 size={18} color="#15803d" />
+              <Text className="font-bold text-green-800 text-base">Key Ingredients</Text>
             </View>
-            {(
-              result.dos && result.dos.length > 0
-                ? result.dos
-                : result.detectedDisease?.toLowerCase().includes('acne') || result.skinType?.toLowerCase().includes('oily')
-                  ? ['Wash face 2x daily', 'Use non-comedogenic makeup', 'Change pillowcases often']
-                  : result.skinType?.toLowerCase().includes('dry')
-                    ? ['Moisturize on damp skin', 'Use a humidifier', 'Drink much water']
-                    : result.skinType?.toLowerCase().includes('sensitive')
-                      ? ['Patch test new products', 'Keep routine simple', 'Wear wide-brimmed hats']
-                      : ['Wash face 2x daily', 'Drink much water', 'Eat antioxidant foods']
-            ).map((item, i) => (
-              <Text key={i} className="text-green-700 text-sm mb-1">• {item}</Text>
-            ))}
+            {diseaseInfo?.recommended_ingredients?.length > 0 ? diseaseInfo.recommended_ingredients.map((item: string, i: number) => (
+              <Text key={i} className="text-green-700 text-sm mb-1 font-medium">• {item}</Text>
+            )) : <Text className="text-green-700 text-sm">See doctor for prescription.</Text>}
           </View>
           <View className="flex-1 border border-red-200 bg-red-50 p-4 rounded-2xl">
-            <View className="flex-row items-center gap-2 mb-2">
-              <XCircle size={16} color="#b91c1c" />
-              <Text className="font-bold text-red-800 text-base">Don'ts</Text>
+            <View className="flex-row items-center gap-2 mb-3">
+              <XCircle size={18} color="#b91c1c" />
+              <Text className="font-bold text-red-800 text-base">Avoid</Text>
             </View>
-            {(
-              result.donts && result.donts.length > 0
-                ? result.donts
-                : result.detectedDisease?.toLowerCase().includes('acne')
-                  ? ['Pop or pick at pimples', 'Over-exfoliate', 'Consume excessive dairy']
-                  : result.skinType?.toLowerCase().includes('dry')
-                    ? ['Use hot water for washing', 'Use alcohol toners', 'Over-wash face']
-                    : result.skinType?.toLowerCase().includes('sensitive')
-                      ? ['Use physical scrubs', 'Use strong fragrances', 'Try many new products at once']
-                      : ['Avoid oily/salty food', "Don't touch face", 'Skip sunscreen']
-            ).map((item, i) => (
-              <Text key={i} className="text-red-700 text-sm mb-1">• {item}</Text>
-            ))}
-          </View>
-        </View>
-
-        {/* Golden Rules */}
-        <View className="mb-8 p-6 bg-amber-50 rounded-3xl border border-amber-200">
-          <View className="flex-row items-center gap-3 mb-4">
-            <Zap size={24} color="#d97706" />
-            <Text className="text-amber-900 font-black text-xl">Golden Rules ✨</Text>
-          </View>
-          <View className="gap-3">
-            <View className="flex-row items-center gap-3">
-              <Sun size={18} color="#d97706" />
-              <Text className="text-amber-800 font-bold flex-1">Sunscreen is MUST (SPF 50+ Daily)</Text>
-            </View>
-            <View className="flex-row items-center gap-3">
-              <Droplet size={18} color="#d97706" />
-              <Text className="text-amber-800 font-bold flex-1">Gentle skincare &gt; Harsh products</Text>
-            </View>
-            <View className="flex-row items-center gap-3">
-              <Zap size={18} color="#d97706" />
-              <Text className="text-amber-800 font-bold flex-1">Consistency is key for results</Text>
-            </View>
-            <View className="flex-row items-center gap-3">
-              <AlertCircle size={18} color="#d97706" />
-              <Text className="text-amber-800 font-bold flex-1">Avoid DIY random treatments</Text>
-            </View>
+            {diseaseInfo?.things_to_avoid?.length > 0 ? diseaseInfo.things_to_avoid.map((item: string, i: number) => (
+              <Text key={i} className="text-red-700 text-sm mb-1 font-medium">• {item}</Text>
+            )) : <Text className="text-red-700 text-sm">None specific.</Text>}
           </View>
         </View>
 
         {/* Home Remedies Section */}
-        {result.remedies && result.remedies.length > 0 && (
-          <View className="mb-8 p-6 bg-green-50 rounded-3xl border border-green-200">
+        {!isSerious && diseaseInfo?.home_remedies && diseaseInfo.home_remedies.length > 0 && (
+          <View className="mb-6 p-5 bg-emerald-50 rounded-2xl border border-emerald-200">
             <View className="flex-row items-center gap-3 mb-4">
-              <Droplet size={24} color="#166534" />
-              <Text className="text-green-900 font-black text-xl">Home Remedies 🌿</Text>
+              <Droplet size={22} color="#047857" />
+              <Text className="text-emerald-900 font-bold text-lg">Safe Home Remedies</Text>
             </View>
             <View className="flex-row flex-wrap gap-2">
-              {result.remedies.map((remedy, i) => (
-                <View key={i} className="bg-white px-4 py-2 rounded-full border border-green-100">
-                  <Text className="text-green-800 font-medium">{remedy}</Text>
+              {diseaseInfo.home_remedies.map((remedy: string, i: number) => (
+                <View key={i} className="bg-white px-4 py-2 rounded-full border border-emerald-100 shadow-sm">
+                  <Text className="text-emerald-800 font-medium">{remedy}</Text>
                 </View>
               ))}
+            </View>
+            <View className="flex-row items-start mt-5 bg-emerald-100/50 p-3 rounded-lg border border-emerald-100">
+              <AlertCircle size={16} color="#047857" style={{ marginTop: 2, marginRight: 8 }} />
+              <Text className="text-sm text-emerald-900 italic flex-1 leading-5">
+                <Text className="font-bold">Disclaimer:</Text> These are supportive care tips and do not replace professional medical treatment, especially for infections, autoimmune diseases, or suspected skin cancers.
+              </Text>
             </View>
           </View>
         )}
 
         {/* Multiple Product Recommendations */}
-        <View className="bg-gray-50 rounded-2xl p-5 border border-gray-100 mb-8">
-          <Text className="font-bold text-gray-900 text-lg mb-4">Recommended Products</Text>
+        {!isSerious && diseaseInfo?.recommended_products && diseaseInfo.recommended_products.length > 0 && (
+          <View className="bg-gray-50 rounded-2xl p-5 border border-gray-100 mb-8">
+            <Text className="font-bold text-gray-900 text-lg mb-4">Recommended Products</Text>
+            {diseaseInfo.recommended_products.map((item: any, idx: number) => (
+              <View key={idx} className="mb-3 flex-row items-center justify-between bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                <View className="flex-row items-center gap-3 flex-1">
+                  <View className="bg-purple-50 p-2 rounded-full">
+                    <Check size={16} color="#9333ea" />
+                  </View>
+                  <Text className="text-gray-800 font-bold text-base flex-1">{item}</Text>
+                </View>
+                <TouchableOpacity 
+                  onPress={() => onNavigate('products', { searchQuery: item })}
+                  className="bg-purple-100 px-4 py-2 rounded-full flex-row items-center gap-1"
+                >
+                  <Text className="text-purple-700 font-bold text-sm">Shop</Text>
+                  <ArrowRight size={14} color="#7e22ce" />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        )}
 
-          {result.recommendations && result.recommendations.map((item: any, idx: number) => (
-            <View key={idx} className="mb-4">
-              <Text className="text-[10px] text-gray-500 font-bold uppercase mb-1 tracking-wider">{item.tier || 'Product'} Option | {item.category}</Text>
-              <Text className="text-gray-800 font-medium text-base">{item.brand} {item.name}</Text>
-              <Text className="text-purple-600 font-bold text-sm">{item.price}</Text>
-            </View>
-          ))}
-          {(!result.recommendations || result.recommendations.length === 0) && (
-            <Text className="text-gray-500 font-medium">No specific products recommended.</Text>
-          )}
+        {/* Medical Disclaimer */}
+        <View className="mt-2 border-t border-gray-100 pt-5">
+          <Text className="text-gray-400 text-xs text-center font-medium leading-relaxed">
+            Disclaimer: This AI analysis is for educational purposes only and is not a substitute for professional medical advice. Always consult a certified dermatologist before starting any new treatment.
+          </Text>
         </View>
+      </View>
 
         {/* Action Buttons */}
         <View className="gap-3">
@@ -313,7 +317,7 @@ function AnalysisResults({ result, onNavigate, isGuest }: AnalysisResultsProps) 
             <ArrowRight size={20} color="white" />
           </TouchableOpacity>
         </View>
-      </View>
+
 
       <Footer />
     </ScrollView>
@@ -428,7 +432,7 @@ export default function AnalysisDetailsPage() {
     loadAnalysis();
   }, [params.id, params.result]);
 
-  const handleNavigate = (page: string) => {
+  const handleNavigate = (page: string, extraParams?: any) => {
     if (page === 'landing') {
       router.push(isGuest ? '/' : '/patient/dashboard');
     }
@@ -436,7 +440,7 @@ export default function AnalysisDetailsPage() {
     else if (page === 'products') {
       router.push({
         pathname: '/patient/products',
-        params: { result: JSON.stringify(result) }
+        params: { result: JSON.stringify(result), ...extraParams }
       });
     }
     else if (page === 'routine') router.push('/patient/routine');
@@ -453,7 +457,7 @@ export default function AnalysisDetailsPage() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white" style={Platform.OS === 'web' ? { height: '100vh' } : { flex: 1 }}>
       {result && <AnalysisResults result={result} onNavigate={handleNavigate} isGuest={isGuest} />}
     </SafeAreaView>
   );

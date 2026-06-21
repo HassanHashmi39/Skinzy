@@ -1,10 +1,9 @@
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import { Sparkles } from 'lucide-react-native';
 import React from 'react';
 import { Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 
 export default function Footer() {
-  const router = useRouter();
   const { width } = useWindowDimensions();
   const isMobile = width < 768;
 
@@ -28,19 +27,6 @@ export default function Footer() {
           </Text>
         </View>
 
-        {/* Quick Links */}
-        <View className={`${isMobile ? 'w-full' : 'w-1/4'}`}>
-          <Text className="text-lg font-bold text-gray-900 mb-4">Quick Links</Text>
-          <View className="gap-3">
-            <TouchableOpacity onPress={() => router.push('/')}><Text className="text-gray-600 transition-colors duration-300 hover:text-purple-600 hover:underline">Home</Text></TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/patient/scan')}><Text className="text-gray-600 transition-colors duration-300 hover:text-purple-600 hover:underline">AI Skin Analysis</Text></TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/patient/dashboard')}><Text className="text-gray-500 text-sm transition-colors duration-300 hover:text-purple-600 hover:underline">Patient Dashboard</Text></TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/doctor/dashboard')}><Text className="text-gray-500 text-sm transition-colors duration-300 hover:text-purple-600 hover:underline">Doctor Dashboard</Text></TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/shared/contact')}><Text className="text-gray-500 text-sm transition-colors duration-300 hover:text-purple-600 hover:underline">Contact Us</Text></TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/patient/medical-form')}><Text className="text-gray-500 text-sm transition-colors duration-300 hover:text-purple-600 hover:underline">Medical Form</Text></TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/patient/healthinfo')}><Text className="text-gray-500 text-sm transition-colors duration-300 hover:text-purple-600 hover:underline">Health Info</Text></TouchableOpacity>
-          </View>
-        </View>
 
         {/* Services */}
         <View className={`${isMobile ? 'w-full' : 'w-1/4'}`}>

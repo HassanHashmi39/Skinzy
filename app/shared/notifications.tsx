@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
-import { SafeAreaView, Text, TouchableOpacity, View, ScrollView, ActivityIndicator } from 'react-native';
-import { ArrowLeft, Bell, Calendar, Check, Clock, MessageCircle, ShoppingBag, Trash2, X, Wifi } from 'lucide-react-native';
+import { Text, TouchableOpacity, View, ScrollView, ActivityIndicator } from 'react-native';
+import { ArrowLeft, Bell, Calendar, Check, Clock, MessageCircle, ShoppingBag, Trash2, X, Wifi, Star } from 'lucide-react-native';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import * as api from '../../utils/api';
@@ -17,6 +17,7 @@ type Notification = {
   message: string;
   time: string;
   isRead: boolean;
+  relatedId?: string;
 };
 
 function timeAgo(date: Date) {
@@ -54,6 +55,7 @@ function getNotifIcon(type: string, color: string) {
     case 'reminder':    return <Clock size={20} color={color} />;
     case 'product':     return <ShoppingBag size={20} color={color} />;
     case 'cancellation':return <X size={20} color={color} />;
+    case 'feedback':    return <Star size={20} color={color} />;
     default:            return <Bell size={20} color={color} />;
   }
 }
@@ -145,6 +147,7 @@ export default function NotificationsPage() {
           message: n.message,
           time: timeAgo(new Date(n.createdAt)),
           isRead: n.isRead,
+          relatedId: n.relatedId
         })));
       }
     } catch (error) {
@@ -195,15 +198,15 @@ export default function NotificationsPage() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
+      <View className="flex-1 bg-gray-50 justify-center items-center">
         <ActivityIndicator size="large" color="#9333ea" />
         <Text className="mt-4 text-gray-500 font-medium">Loading notifications...</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-gray-50">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="px-4 py-6 max-w-3xl mx-auto w-full">
 
@@ -331,6 +334,17 @@ export default function NotificationsPage() {
                         </View>
                         <Text className="text-gray-600 text-sm mb-2">{notif.message}</Text>
                         <Text className="text-xs text-gray-400">{notif.time}</Text>
+
+                        {/* Special Feedback Action */}
+                        {notif.type === 'feedback' && (
+                          <TouchableOpacity 
+                            onPress={() => router.push({ pathname: '/patient/history', params: { openFeedback: notif.relatedId } })}
+                            className="mt-3 bg-amber-500 py-2.5 px-4 rounded-xl items-center flex-row justify-center gap-2 self-start"
+                          >
+                            <Star size={16} color="white" fill="white" />
+                            <Text className="text-white font-bold text-sm">Leave Feedback</Text>
+                          </TouchableOpacity>
+                        )}
                       </View>
                       {/* Actions */}
                       <View className="gap-2">
@@ -359,6 +373,6 @@ export default function NotificationsPage() {
           <View className="h-10" />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

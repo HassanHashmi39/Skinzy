@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, Alert, Image, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Activity, ArrowLeft, Calendar, FileText, Mail, Phone, Send, User, ChevronRight } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
 import * as api from '../../utils/api';
@@ -342,13 +342,13 @@ export default function PatientDetailPage() {
     // This is just a wrapper for when it's used as a standalone page, 
     // usually it's used as a component within DoctorDashboard
     return (
-        <SafeAreaView className="flex-1 bg-white">
+        <View className="flex-1 bg-white">
             <View className="p-4">
                 <Text>Please select a patient from the dashboard.</Text>
                 <TouchableOpacity onPress={() => router.back()} className="mt-4 p-3 bg-purple-600 rounded-lg self-start">
                     <Text className="text-white">Back</Text>
                 </TouchableOpacity>
             </View>
-        </SafeAreaView>
+        </View>
     );
 }
