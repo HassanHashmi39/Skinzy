@@ -16,7 +16,7 @@ if (!isWeb && Constants?.expoConfig?.hostUri) {
   }
 }
 
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || (isWeb ? 'http://localhost:4445/api' : `http://${serverIp}:4445/api`);
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://skinzy.onrender.com/api';
 export const SOCKET_URL = API_BASE_URL.replace('/api', '');
 
 // ─────────────────────────────────────────────

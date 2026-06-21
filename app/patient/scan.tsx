@@ -316,10 +316,7 @@ const finishAnalysis = async () => {
     if (!image) return;
 
     const derivedDiagnoseUrl = api.SOCKET_URL.replace(':4445', ':5001') + '/api/diagnose';
-    const AI_SERVER_URL = process.env.EXPO_PUBLIC_AI_SERVER_URL ||
-        (Platform.OS === 'web'
-            ? `http://${window.location.hostname}:5001/api/diagnose`
-            : derivedDiagnoseUrl);
+    const AI_SERVER_URL = process.env.EXPO_PUBLIC_AI_SERVER_URL || 'https://hassanhashmi39-skinzy.hf.space/api/diagnose';
 
     try {
         await new Promise(resolve => setTimeout(resolve, 500));
