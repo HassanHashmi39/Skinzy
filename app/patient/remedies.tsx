@@ -39,11 +39,11 @@ function Remedies({ result, onNavigate }: RemediesProps) {
         if (response.ok && data.remedies) {
           const mappedRemedies = data.remedies.map((r: any) => ({
             id: r._id,
-            title: r.name,
-            category: 'General',
-            ingredients: r.description.split(',').map((s: string) => s.trim()),
+            title: r.name || 'Remedy',
+            category: r.condition || 'General',
+            ingredients: r.description ? r.description.split(',').map((s: string) => s.trim()) : [r.name],
             benefits: ['Natural Care'],
-            howToUse: 'Apply as directed.',
+            howToUse: r.instructions ? r.instructions.split('.').map((s: string) => s.trim()).filter(Boolean).join('. ') : 'Apply as directed.',
             frequency: 'Daily',
             icon: <Leaf size={24} color="#16a34a" />,
             bestFor: ['All Skin Types'],

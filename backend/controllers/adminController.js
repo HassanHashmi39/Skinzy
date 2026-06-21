@@ -103,52 +103,57 @@ const parseCSV = (filePath) => {
     });
 };
 
+let cachedAdminProducts = null;
+
 // @desc    Get all products and remedies
 // @route   GET /api/admin/products
 // @access  Private (Admin)
 const getProductsAdmin = async (req, res) => {
     try {
-        const productsCsvPath = path.join(__dirname, '..', 'data', 'products.csv');
-        const remediesCsvPath = path.join(__dirname, '..', 'data', 'remedies.csv');
-        
-        const productRows = parseCSV(productsCsvPath);
-        const products = productRows.map((row, index) => ({
-            _id: `prod_${index}`,
-            name: row.Name,
-            category: row.Category,
-            brand: row.Brand,
-            price: row.Price,
-            condition: row.Condition,
-            tier: row.Tier,
-            type: 'product',
-            isActive: true,
-            createdAt: new Date().toISOString()
-        }));
+        if (!cachedAdminProducts) {
+            const productsCsvPath = path.join(__dirname, '..', 'data', 'products.csv');
+            const remediesCsvPath = path.join(__dirname, '..', 'data', 'remedies.csv');
+            
+            const productRows = parseCSV(productsCsvPath);
+            const products = productRows.map((row, index) => ({
+                _id: `prod_${index}`,
+                name: row.Name,
+                category: row.Category,
+                brand: row.Brand,
+                price: row.Price,
+                condition: row.Condition,
+                tier: row.Tier,
+                type: 'product',
+                isActive: true,
+                createdAt: new Date().toISOString()
+            }));
 
-        const remedyRows = parseCSV(remediesCsvPath);
-        let remedies = [];
-        let idCounter = 0;
-        remedyRows.forEach(row => {
-            const condition = row.Condition;
-            for (let i = 1; i <= 3; i++) {
-                const remedyName = row[`Remedy_${i}`];
-                if (remedyName) {
-                    remedies.push({
-                        _id: `rem_${idCounter++}`,
-                        name: remedyName,
-                        condition: condition,
-                        type: 'remedy',
-                        isActive: true,
-                        createdAt: new Date().toISOString()
-                    });
+            const remedyRows = parseCSV(remediesCsvPath);
+            let remedies = [];
+            let idCounter = 0;
+            remedyRows.forEach(row => {
+                const condition = row.Condition;
+                for (let i = 1; i <= 3; i++) {
+                    const remedyName = row[`Remedy_${i}`];
+                    if (remedyName) {
+                        remedies.push({
+                            _id: `rem_${idCounter++}`,
+                            name: remedyName,
+                            condition: condition,
+                            type: 'remedy',
+                            isActive: true,
+                            createdAt: new Date().toISOString()
+                        });
+                    }
                 }
-            }
-        });
+            });
+            cachedAdminProducts = [...products, ...remedies];
+        }
 
         // Also fetch any manually added products from MongoDB, just in case
         const dbProducts = await Product.find().sort({ createdAt: -1 });
 
-        const allItems = [...dbProducts, ...products, ...remedies];
+        const allItems = [...dbProducts, ...cachedAdminProducts];
         res.json({ products: allItems });
     } catch (error) {
         res.status(500).json({ message: error.message });
