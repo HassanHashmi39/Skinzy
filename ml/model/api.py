@@ -257,9 +257,15 @@ def load_csv_rows(csv_path):
 
 
 def build_runtime_disease_database(class_names):
-    products_rows = load_csv_rows(os.path.join(METADATA_DIR, "products.csv"))
-    remedies_rows = load_csv_rows(os.path.join(METADATA_DIR, "remedies.csv"))
-    severity_rows = load_csv_rows(os.path.join(METADATA_DIR, "severity.csv"))
+    # Try metadata dir first, then fallback to current directory
+    def get_csv_path(filename):
+        p1 = os.path.join(METADATA_DIR, filename)
+        p2 = os.path.join(SCRIPT_DIR, filename)
+        return p1 if os.path.exists(p1) else p2
+
+    products_rows = load_csv_rows(get_csv_path("products.csv"))
+    remedies_rows = load_csv_rows(get_csv_path("remedies.csv"))
+    severity_rows = load_csv_rows(get_csv_path("severity.csv"))
 
     runtime = defaultdict(lambda: {
         "name_en": "",
