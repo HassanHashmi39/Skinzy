@@ -236,7 +236,13 @@ export function PatientChatScreen({ onBack, initialDoctorId }: { onBack: () => v
   };
 
   const handlePickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, base64: true, quality: 0.6 });
+    // Heavily compress image to save MongoDB space
+    const result = await ImagePicker.launchImageLibraryAsync({ 
+        mediaTypes: ImagePicker.MediaTypeOptions.Images, 
+        base64: true, 
+        quality: 0.1,
+        allowsEditing: true
+    });
     if (!result.canceled && result.assets[0]) {
       const a = result.assets[0];
       await handleSend('', { type: 'image', url: `data:${a.mimeType || 'image/jpeg'};base64,${a.base64}`, name: a.fileName || 'image.jpg' });
