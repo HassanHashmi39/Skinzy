@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
-import { Camera, ChevronLeft, Image as ImageIcon, Info, Sparkles, X, FlipHorizontal } from 'lucide-react-native';
+import { Camera, ChevronLeft, Image as ImageIcon, Info, Sparkles, X, FlipHorizontal, SwitchCamera } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Dimensions, Image, Modal, Platform, SafeAreaView, ScrollView, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import Footer from '../../components/Footer';
@@ -89,7 +89,8 @@ export default function SkinAnalysisPage() {
 
     const [isCameraActive, setIsCameraActive] = useState(false);
     const [cameraError, setCameraError] = useState<string | null>(null);
-    const [isMirrored, setIsMirrored] = useState(false);
+    const [isMirrored, setIsMirrored] = useState(true);
+    const [cameraFacing, setCameraFacing] = useState<"user" | "environment">("user");
     const videoRef = useRef<any>(null);
     const streamRef = useRef<MediaStream | null>(null);
 
@@ -196,7 +197,7 @@ const takePhoto = async () => {
     }
 };
 
-const startWebCamera = async () => {
+const startWebCamera = async (facing = cameraFacing) => {
     setCameraError(null);
     try {
         // Stop existing stream if we are flipping
@@ -206,13 +207,15 @@ const startWebCamera = async () => {
 
         const constraints = {
             video: {
-                facingMode: "user",
+                facingMode: facing,
                 width: { ideal: 1280 },
                 height: { ideal: 720 }
             }
         };
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         streamRef.current = stream;
+        setCameraFacing(facing);
+        setIsMirrored(facing === 'user');
         setIsCameraActive(true);
         setImage(null);
     } catch (err: any) {
@@ -235,6 +238,11 @@ const stopWebCamera = () => {
         streamRef.current = null;
     }
     setIsCameraActive(false);
+};
+
+const toggleCameraFacing = () => {
+    const newFacing = cameraFacing === 'user' ? 'environment' : 'user';
+    startWebCamera(newFacing);
 };
 
 const toggleMirror = () => {
@@ -824,10 +832,10 @@ return (
 
                                 <View className="absolute bottom-4 left-0 right-0 flex-row justify-center gap-4">
                                     <TouchableOpacity
-                                        onPress={toggleMirror}
+                                        onPress={toggleCameraFacing}
                                         className="bg-gray-800 p-4 rounded-full shadow-2xl transform active:scale-95 transition-all"
                                     >
-                                        <FlipHorizontal size={28} color="white" />
+                                        <SwitchCamera size={28} color="white" />
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         onPress={captureWebPhoto}
