@@ -21,7 +21,7 @@ const parseCSV = (filePath) => {
 
 const getProducts = async (req, res) => {
     try {
-        const csvPath = path.join(__dirname, '..', '..', 'ml', 'model', 'metadata', 'products.csv');
+        const csvPath = path.join(__dirname, '..', 'data', 'products.csv');
         const rows = parseCSV(csvPath);
         
         const products = rows.map((row, index) => ({
@@ -46,7 +46,7 @@ const getProducts = async (req, res) => {
 
 const getRemedies = async (req, res) => {
     try {
-        const csvPath = path.join(__dirname, '..', '..', 'ml', 'model', 'metadata', 'remedies.csv');
+        const csvPath = path.join(__dirname, '..', 'data', 'remedies.csv');
         const rows = parseCSV(csvPath);
         
         let remedies = [];
