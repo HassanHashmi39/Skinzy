@@ -93,10 +93,10 @@ If you're interested in refining the model:
 
 ---
 
-## 🌐 Deployment Recommendation
-For a free, full-stack deployment:
-- **Frontend**: [Netlify](https://www.netlify.com/)
-- **Backend**: [Render](https://render.com/) or [Koyeb](https://www.koyeb.com/)
+## 🌐 Deployment
+This project is configured for cloud deployment:
+- **Frontend**: Hosted on [Vercel](https://vercel.com/)
+- **Backend**: Hosted on [Render](https://render.com/)
 - **Database**: [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 - **AI Server**: [Hugging Face Spaces](https://huggingface.co/spaces) (Docker/Flask CPU)
 
