@@ -7,7 +7,7 @@ Skinzy is a comprehensive, full-stack AI-driven application designed to revoluti
 ## 🚀 Key Features
 
 ### 📋 For Patients
-- **AI Skin Analysis**: Advanced disease detection (Acne, Eczema, Rosacea, etc.) using TensorFlow and MobileNetV2.
+- **AI Skin Analysis**: Advanced skin condition detection (Acne, Dryness, Oiliness, Pigmentation, Normal) using PyTorch (ResNet18).
 - **Personalized Action Plans**: Automated morning and night routines based on AI findings.
 - **History Tracking**: Visual progress logs of your skin's health over time.
 - **Smart Recommendations**: Product suggestions from top local brands (Jenpharm, Saeed Ghani, Vince, etc.) tailored to your condition.
@@ -24,7 +24,7 @@ Skinzy is a comprehensive, full-stack AI-driven application designed to revoluti
 
 - **Frontend**: [Expo](https://expo.dev) / React Native (Native iOS/Android & Web)
 - **Backend API**: Node.js, Express, MongoDB
-- **AI/ML Server**: Python, Flask, TensorFlow (MobileNetV2), OpenCV
+- **AI/ML Server**: Python, Flask, PyTorch (ResNet18), Torchvision, OpenCV
 - **Authentication**: JWT (JSON Web Tokens)
 - **State Management**: React Hooks & Context API
 - **Styling**: NativeWind (Tailwind CSS for React Native)
