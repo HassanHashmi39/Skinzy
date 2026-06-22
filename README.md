@@ -66,6 +66,7 @@ npm install
 # Create a .env file (refer to backend/README.md)
 npm run dev
 ```
+> **⚠️ Security Note:** Never commit your `.env` file to version control. Keep your MongoDB credentials secure and avoid hardcoding them in your application files.
 
 ### 4. AI Server Setup
 ```bash

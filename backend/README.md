@@ -45,6 +45,7 @@ PORT=5000
 MONGO_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/skinzy
 JWT_SECRET=your_complex_secret_here
 ```
+> **⚠️ Security Note:** Never commit your `.env` file to version control (ensure it is in your `.gitignore`). Always use `process.env.MONGO_URI` in your code instead of hardcoding database credentials.
 
 ### 3. Run Server
 ```bash
