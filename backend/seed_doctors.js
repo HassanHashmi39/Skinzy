@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-mongoose.connect('mongodb://localhost:27017/skinzy').then(async () => {
+require('dotenv').config();
+
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/skinzy').then(async () => {
     const db = mongoose.connection.db;
     const salt = await bcrypt.genSalt(10);
     const hashedPw = await bcrypt.hash('Doctor123', salt);

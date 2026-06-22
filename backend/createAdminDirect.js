@@ -1,7 +1,8 @@
 const { MongoClient } = require('mongodb');
 const bcrypt = require('bcryptjs');
 
-const uri = "REDACTED";
+require('dotenv').config();
+const uri = process.env.MONGO_URI;
 
 async function run() {
     const client = new MongoClient(uri);
