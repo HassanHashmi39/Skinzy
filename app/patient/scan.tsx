@@ -468,9 +468,6 @@ const finishAnalysis = async () => {
 };
 
 const processAIResult = (aiResult: any) => {
-    setIsAnalyzing(false);
-    setAnalysisProgress(0);
-
     const confidence = aiResult.confidence || 0.5;
     const isLowCondition = confidence < 0.55;
 
@@ -479,15 +476,19 @@ const processAIResult = (aiResult: any) => {
             // Web doesn't support Alert.alert custom buttons properly, so just navigate directly
             navigateToResults(aiResult);
         } else {
+            setIsAnalyzing(false);
+            setAnalysisProgress(0);
             Alert.alert(
                 'Concern Detected',
                 'Based on our AI analysis, your skin may need professional attention. Would you like to book an appointment with a dermatologist?',
                 [
-                    { text: 'See Results First', onPress: () => navigateToResults(aiResult) },
+                    { text: 'See Results First', onPress: () => { setIsAnalyzing(true); navigateToResults(aiResult); } },
                     {
                         text: 'Book Appointment', onPress: () => {
-                            navigateToResults(aiResult);
-                            router.push('/patient/appointments');
+                            setIsAnalyzing(true);
+                            navigateToResults(aiResult).then(() => {
+                                router.push('/patient/appointments');
+                            });
                         }, style: 'default'
                     }
                 ]
@@ -560,6 +561,9 @@ const navigateToResults = async (aiResult: any) => {
         console.error('Failed to pre-save analysis:', err);
     }
 
+    setIsAnalyzing(false);
+    setAnalysisProgress(0);
+
     router.push({
         pathname: `/patient/analysis/${savedId}` as any,
         params: { result: JSON.stringify(results) }
@@ -610,7 +614,7 @@ if (isAnalyzing) {
                     </View>
                 </View>
 
-                <Text className="text-3xl font-black text-gray-900 mb-2 text-center w-[180px]">Analyzing{dots}</Text>
+                <Text className="text-3xl font-black text-gray-900 mb-2 text-center w-[180px]">{analysisProgress >= 100 ? `Finalizing${dots}` : `Analyzing${dots}`}</Text>
                 <Text className="text-gray-500 text-center mb-6 px-4">Our AI is scanning for 12+ skin indicators. One moment please.</Text>
 
                 <View className="w-full max-w-xs bg-gray-200 h-6 rounded-full overflow-hidden mb-6 relative justify-center border border-gray-200 shadow-inner">
